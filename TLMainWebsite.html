@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLMenu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04030d;
+  --bg2:#080618;
+  --surface:#0d0b1e;
+  --border:#2a1f5e;
+  --border2:#4a3a8a;
+  --accent:#7c5cfc;
+  --accent2:#c084fc;
+  --accent3:#38bdf8;
+  --gold:#f59e0b;
+  --text:#e8e4ff;
+  --muted:#6b5f9e;
+  --mono:'Space Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --display:'Montserrat',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:none}
+a,button{cursor:none}
+
+/* CUSTOM CURSOR */
+#cursor{position:fixed;top:0;left:0;will-change:transform;width:12px;height:12px;background:var(--accent2);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.15s,height 0.15s,background 0.15s;mix-blend-mode:screen}
+#cursor-ring{position:fixed;top:0;left:0;will-change:transform;width:36px;height:36px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width 0.12s,height 0.12s,border-color 0.12s;mix-blend-mode:screen}
+#cursor.clicking{width:6px;height:6px;background:var(--gold)}
+#cursor-ring.clicking{width:50px;height:50px;border-color:var(--gold)}
+#cursor.hovering{width:18px;height:18px;background:var(--accent3)}
+#cursor-ring.hovering{width:52px;height:52px;border-color:var(--accent3)}
+
+#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(4,3,13,0.85);backdrop-filter:blur(20px)}
+.nav-logo{font-family:var(--mono);font-size:1.1rem;letter-spacing:0.1em;font-weight:700;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:0.78rem;text-decoration:none;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;font-family:var(--mono)}
+.nav-links a:hover{color:var(--accent2)}
+.nav-cta{font-family:var(--mono);font-size:0.7rem;padding:0.55rem 1.4rem;border:1px solid var(--accent);background:transparent;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;transition:all 0.3s;position:relative;overflow:hidden}
+.nav-cta:hover{border-color:var(--accent2);box-shadow:0 0 20px rgba(124,92,252,0.4);color:var(--text)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:8rem 3rem 4rem;position:relative;overflow:hidden;z-index:1}
+.hero-nebula{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 65% 40%,rgba(124,92,252,0.13) 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 20% 70%,rgba(56,189,248,0.08) 0%,transparent 60%);pointer-events:none}
+.hero-content{position:relative;z-index:2;max-width:900px}
+.hero-badge{display:inline-flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.66rem;letter-spacing:0.15em;color:var(--accent2);border:1px solid var(--border2);padding:0.4rem 1rem;margin-bottom:2.5rem;text-transform:uppercase;background:rgba(124,92,252,0.06)}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);box-shadow:0 0 8px var(--accent2);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+h1{font-family:var(--display);font-size:clamp(3.2rem,8vw,7.5rem);font-weight:900;line-height:0.9;letter-spacing:-0.03em;margin-bottom:2rem}
+.h1-line1{display:block;color:var(--text)}
+.h1-line2{display:block;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding-bottom:0.05em}
+.hero-desc{font-size:1rem;color:var(--text);max-width:520px;line-height:1.6;font-weight:600;font-family:var(--display);margin-bottom:3rem;letter-spacing:-0.01em}
+.hero-btns{display:flex;gap:1rem;align-items:center}
+.btn-primary{font-family:var(--mono);font-size:0.73rem;padding:0.95rem 2.2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;transition:all 0.3s;position:relative;overflow:hidden;display:inline-block}
+.btn-primary:hover{box-shadow:0 0 35px rgba(192,132,252,0.55);transform:translateY(-2px)}
+.btn-ghost{font-family:var(--mono);font-size:0.73rem;padding:0.95rem 2.2rem;background:transparent;color:var(--accent2);border:1px solid var(--border2);letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;transition:all 0.3s}
+.btn-ghost:hover{border-color:var(--accent2);color:var(--accent3);box-shadow:0 0 20px rgba(124,92,252,0.2);transform:translateY(-2px)}
+.hero-scroll{position:absolute;bottom:3rem;right:3rem;font-family:var(--mono);font-size:0.58rem;letter-spacing:0.18em;color:var(--muted);writing-mode:vertical-rl;display:flex;align-items:center;gap:1rem;text-transform:uppercase}
+.hero-scroll::after{content:'';width:1px;height:60px;background:linear-gradient(to bottom,var(--border2),transparent)}
+
+/* STATS */
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);position:relative;z-index:1}
+.stat-item{padding:2.5rem 2rem;border-right:1px solid var(--border);position:relative;overflow:hidden;transition:background 0.3s}
+.stat-item:hover{background:rgba(124,92,252,0.05)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-family:var(--mono);font-size:2rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.3rem;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-size:0.72rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;font-family:var(--mono)}
+
+/* DIVIDER */
+.cosmic-divider{height:1px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),var(--accent3),transparent);position:relative;z-index:1}
+
+/* FEATURES */
+.section{padding:7rem 3rem;position:relative;z-index:1}
+.section-header{display:flex;align-items:flex-end;margin-bottom:4rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.section-label{font-family:var(--mono);font-size:0.63rem;letter-spacing:0.22em;color:var(--accent);margin-bottom:1rem;text-transform:uppercase}
+.section-title{font-family:var(--display);font-size:clamp(1.7rem,3vw,2.6rem);font-weight:900;line-height:1.05;color:var(--text)}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+@media(max-width:900px){.feature-grid{grid-template-columns:repeat(2,1fr)}}
+.feature-card{padding:2.5rem;border:1px solid var(--border);margin:-1px 0 0 -1px;position:relative;overflow:hidden;transition:border-color 0.3s,background 0.3s;background:var(--bg)}
+.feature-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(124,92,252,0.09),transparent);opacity:0;transition:opacity 0.3s}
+.feature-card:hover{border-color:var(--border2);background:var(--surface)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:46px;height:46px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;background:rgba(124,92,252,0.07);transition:all 0.3s}
+.feature-card:hover .feature-icon{border-color:var(--accent);box-shadow:0 0 16px rgba(124,92,252,0.35)}
+.feature-icon svg{width:20px;height:20px;stroke:var(--accent2);fill:none;stroke-width:1.5}
+.feature-card h3{font-family:var(--mono);font-size:0.82rem;font-weight:700;letter-spacing:0.06em;margin-bottom:0.8rem;color:var(--text);text-transform:uppercase}
+.feature-card p{font-size:0.84rem;color:var(--muted);line-height:1.75;font-weight:400}
+.feature-num{position:absolute;top:1.5rem;right:1.5rem;font-family:var(--mono);font-size:0.58rem;color:var(--border2);font-weight:700;letter-spacing:0.12em}
+
+/* PREVIEW */
+.preview{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:7rem 3rem;position:relative;z-index:1;overflow:hidden}
+.preview::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:700px;height:350px;background:radial-gradient(ellipse,rgba(124,92,252,0.09),transparent);pointer-events:none}
+.preview-inner{max-width:740px;margin:0 auto;text-align:center}
+.preview-inner h2{font-family:var(--display);font-size:1.9rem;font-weight:900;line-height:1.1;color:var(--text);margin-bottom:0.5rem}
+.preview-inner .sub{font-size:0.78rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.12em;margin-bottom:3rem}
+.preview-window{background:var(--bg);border:1px solid var(--border2);overflow:hidden;box-shadow:0 0 60px rgba(124,92,252,0.14)}
+.window-bar{display:flex;align-items:center;gap:0.5rem;padding:0.85rem 1.2rem;border-bottom:1px solid var(--border)}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot:nth-child(1){background:#ff5f56}
+.dot:nth-child(2){background:#ffbd2e}
+.dot:nth-child(3){background:#27c93f}
+.window-title{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-left:auto;margin-right:auto;letter-spacing:0.1em}
+.code-block{padding:2.2rem;text-align:left;font-family:var(--mono);font-size:0.77rem;line-height:1.95;color:var(--muted)}
+.code-line{display:block}
+.code-kw{color:var(--accent2);font-weight:700}
+.code-str{color:#86efac}
+.code-num{color:var(--accent3)}
+.code-comment{color:var(--border2)}
+.code-fn{color:var(--gold)}
+
+/* CTA */
+.cta-section{padding:9rem 3rem;text-align:center;position:relative;z-index:1;overflow:hidden}
+.cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(124,92,252,0.11),transparent 70%);pointer-events:none}
+.cta-inner{position:relative;z-index:2}
+.cta-inner h2{font-family:var(--display);font-size:clamp(2.2rem,5vw,4rem);font-weight:900;margin-bottom:1.5rem;line-height:1.0;background:linear-gradient(135deg,var(--text) 0%,var(--accent2) 60%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-inner p{color:var(--muted);font-size:0.88rem;font-family:var(--mono);letter-spacing:0.06em;margin-bottom:2.5rem;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.9}
+.cta-btns{display:flex;gap:1rem;justify-content:center}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.footer-logo{font-family:var(--mono);font-size:0.9rem;font-weight:700;letter-spacing:0.1em;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer-copy{font-size:0.68rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.06em}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-size:0.68rem;color:var(--muted);text-decoration:none;letter-spacing:0.1em;transition:color 0.2s;font-family:var(--mono);text-transform:uppercase}
+.footer-links a:hover{color:var(--accent2)}
+
+/* ANIMS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.hero-content>*{animation:fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both}
+.hero-badge{animation-delay:0.05s}
+h1{animation-delay:0.15s}
+.hero-desc{animation-delay:0.25s}
+.hero-btns{animation-delay:0.35s}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  .hero{padding:6rem 1.5rem 3rem}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat-item{padding:1.5rem}
+  .section{padding:4rem 1.5rem}
+  footer{flex-direction:column;gap:1rem;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="stars-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">TLMenu</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#preview">Preview</a></li>
+    <li><a href="#docs">Docs</a></li>
+  </ul>
+  <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" target="_blank" class="nav-cta">Get Script</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-nebula"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="hero-badge-dot"></span>TLMenu · v0.069</div>
+    <h1>
+      <span class="h1-line1">The</span>
+      <span class="h1-line2">TLMenu</span>
+      <span class="h1-line1">Script</span>
+    </h1>
+    <p class="hero-desc">A powerful and highly detailed GUI menu system for Roblox — built for scripters who value clean interfaces, advanced functionality, extensive customization, and optimized performance.</p>
+    <div class="hero-btns">
+      <a href="#" class="btn-primary">Download Free</a>
+      <a href="#preview" class="btn-ghost">View Docs →</a>
+    </div>
+  </div>
+  <div class="hero-scroll">scroll</div>
+</section>
+
+<div class="stats">
+  <div class="stat-item">
+    <div class="stat-num">12k+</div>
+    <div class="stat-label">Downloads</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">0.3ms</div>
+    <div class="stat-label">Avg. Load Time</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">40+</div>
+    <div class="stat-label">Components</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">v2.0</div>
+    <div class="stat-label">Latest Release</div>
+  </div>
+</div>
+
+<div class="cosmic-divider"></div>
+
+<section class="section" id="features">
+  <div class="section-header">
+    <div>
+      <div class="section-label">// TLMENU FEATURES</div>
+      <div class="section-title">Built for speed.<br>Designed for clarity.</div>
+    </div>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-num">01</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>QuickActions on Players</h3>
+      <p>Hug, Kiss, Slap and over 40+ different animations — all accessible in one click directly on any player.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">02</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <h3>Emote System</h3>
+      <p>Press <strong style="font-family:var(--mono);color:var(--accent2)">.</strong> (dot) to open the full emote wheel. Instant access to all emotes mid-game.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">03</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <h3>Recolorable GUI</h3>
+      <p>Fully customizable interface colors plus a custom cursor. Make TLMenu look exactly how you want it.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">04</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </div>
+      <h3>Smartbar Tabs</h3>
+      <p>Home · Character · Scripts · Actions · Playerlist · Settings — all organized in a clean top-bar navigation.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">05</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </div>
+      <h3>Game Scripts</h3>
+      <p>Built-in script hubs for MM2, Bladeball and 99 Nights. Execute directly from the Scripts tab.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">06</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>German &amp; French Voice</h3>
+      <p>Switch the GUI voice language between German and French — unique regional audio skin support built in.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">07</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
+      </div>
+      <h3>Universal FE Aimbot</h3>
+      <p>Smooth, configurable aim-assist system. Works across supported games with adjustable FOV and sensitivity.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">08</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
+      </div>
+      <h3>Troll Options</h3>
+      <p>Fun troll actions accessible via the QuickActions menu. Keep your free-admin game entertaining for everyone.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">09</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <h3>40+ Animations</h3>
+      <p>A massive library of social animations beyond the basics — dances, reactions, gestures and more, all FE-ready.</p>
+    </div>
+  </div>
+</section>
+
+<div class="cosmic-divider"></div>
+
+<section class="preview" id="preview">
+  <div class="preview-inner">
+    <div class="section-label" style="font-family:var(--mono);font-size:0.63rem;letter-spacing:0.22em;color:var(--accent);margin-bottom:0.8rem;text-transform:uppercase"> TL Loadstring</div>
+    <h2>It’s not cheating. It’s understanding the system better than the people who made it.</h2>
+    <p class="sub">Copy. Inject. Enjoy.</p>
+    <div class="preview-window" style="overflow:visible;position:relative;min-height:420px;background:var(--bg)">
+      <div class="window-bar">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <span class="window-title">Test-GUI · Live Demo</span>
+      </div>
+
+      <!-- DEMO VIEWPORT -->
+      <div id="demo-viewport" style="position:relative;width:100%;height:380px;background:linear-gradient(135deg,#0a0818 0%,#0d0b1e 60%,#0a1020 100%);overflow:hidden;user-select:none;">
+
+        <!-- Roblox-style background grid -->
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(124,92,252,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,0.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none"></div>
+
+        <!-- DRAGGABLE ICON -->
+        <div id="tl-icon" style="
+          position:absolute;left:32px;top:50%;transform:translateY(-50%);
+          width:64px;height:64px;
+          background:linear-gradient(135deg,#1a1535,#0f0d22);
+          border:1.5px solid #4a3a8a;
+          border-radius:14px;
+          display:flex;align-items:center;justify-content:center;
+          cursor:grab;
+          box-shadow:0 0 18px rgba(124,92,252,0.25),inset 0 1px 0 rgba(255,255,255,0.05);
+          transition:box-shadow 0.2s,border-color 0.2s;
+          z-index:10;
+        " title="Drag me or click to open!">
+          <!-- TL Icon SVG (simulated Roblox image) -->
+          <div style="width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#7c5cfc,#c084fc);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.04em;box-shadow:0 0 12px rgba(192,132,252,0.5)">TL</div>
+        </div>
+
+        <!-- Drag hint -->
+        <div id="drag-hint" style="position:absolute;left:108px;top:50%;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:0.55rem;color:rgba(107,95,158,0.7);letter-spacing:0.12em;pointer-events:none;transition:opacity 0.4s">
+          ← DRAG OR CLICK
+        </div>
+
+        <!-- PANEL -->
+        <div id="tl-panel" style="
+          position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+          width:260px;
+          background:rgba(13,11,30,0.97);
+          border:1px solid #2a1f5e;
+          border-radius:10px;
+          box-shadow:0 0 40px rgba(124,92,252,0.2),0 8px 32px rgba(0,0,0,0.6);
+          display:none;
+          flex-direction:column;
+          overflow:hidden;
+          z-index:20;
+          backdrop-filter:blur(10px);
+        ">
+          <!-- Panel titlebar -->
+          <div id="tl-panel-bar" style="
+            display:flex;align-items:center;justify-content:space-between;
+            padding:9px 12px;
+            background:rgba(42,31,94,0.5);
+            border-bottom:1px solid #2a1f5e;
+            cursor:grab;
+          ">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#7c5cfc,#c084fc);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:#fff">TL</div>
+              <span style="font-family:'Space Mono',monospace;font-size:0.62rem;font-weight:700;color:#e8e4ff;letter-spacing:0.08em">Simple GUI</span>
+            </div>
+            <button id="tl-close" style="
+              width:20px;height:20px;border-radius:5px;
+              background:#c8384a;border:none;
+              color:#fff;font-size:10px;font-weight:700;
+              display:flex;align-items:center;justify-content:center;
+              cursor:pointer;transition:background 0.15s;
+            ">✕</button>
+          </div>
+
+          <!-- Panel body -->
+          <div style="padding:14px 12px;display:flex;flex-direction:column;gap:10px;">
+
+            <!-- Welcome label -->
+            <div style="font-family:'DM Sans',sans-serif;font-size:0.72rem;color:#6b5f9e;line-height:1.5;padding:8px 10px;background:rgba(124,92,252,0.06);border:1px solid rgba(42,31,94,0.8);border-radius:6px;">
+              Willkommen! Dies ist ein einfaches GUI.
+            </div>
+
+            <!-- Action button -->
+            <button id="tl-action" style="
+              width:100%;padding:9px;
+              background:linear-gradient(135deg,#7c5cfc,#a370fc);
+              border:none;border-radius:7px;
+              font-family:'Space Mono',monospace;font-size:0.65rem;font-weight:700;
+              color:#fff;letter-spacing:0.06em;text-transform:uppercase;
+              cursor:pointer;
+              box-shadow:0 2px 14px rgba(124,92,252,0.35);
+              transition:all 0.2s;
+            ">Aktion ausführen</button>
+
+            <!-- Toggle row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;">
+              <span style="font-family:'Space Mono',monospace;font-size:0.58rem;color:#6b5f9e;letter-spacing:0.06em;text-transform:uppercase">FlyMode</span>
+              <div id="tl-toggle" style="
+                width:34px;height:18px;border-radius:9px;
+                background:#1a1535;border:1px solid #2a1f5e;
+                position:relative;cursor:pointer;transition:background 0.2s;
+              ">
+                <div id="tl-thumb" style="
+                  position:absolute;top:2px;left:2px;
+                  width:12px;height:12px;border-radius:50%;
+                  background:#4a3a8a;transition:all 0.2s;
+                "></div>
+              </div>
+            </div>
+
+            <!-- Status label -->
+            <div id="tl-status" style="
+              font-family:'Space Mono',monospace;font-size:0.58rem;
+              color:#4ade80;letter-spacing:0.08em;
+              min-height:16px;text-align:center;opacity:0;
+              transition:opacity 0.2s;
+            ">✓ Aktion ausgeführt!</div>
+          </div>
+        </div><!-- /panel -->
+      </div><!-- /demo-viewport -->
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <h2>Ready to build<br>something legendary?</h2>
+    <p>Download TLMenu for free and start building polished Roblox interfaces in minutes.</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-primary">Download v2.0</a>
+      <a href="#" class="btn-ghost">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">TLMenu</div>
+  <div class="footer-links">
+    <a href="#">Docs</a>
+    <a href="#">Changelog</a>
+    <a href="#">GitHub</a>
+    <a href="#">Discord</a>
+  </div>
+  <div class="footer-copy">© 2026 TLMenu</div>
+</footer>
+
+<script>
+// CUSTOM CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cursor.style.transform='translate(calc('+mx+'px - 50%), calc('+my+'px - 50%))';
+},{ passive: true });
+function animRing(){
+  rx+=(mx-rx)*0.22;
+  ry+=(my-ry)*0.22;
+  ring.style.transform='translate(calc('+rx+'px - 50%), calc('+ry+'px - 50%))';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.addEventListener('mousedown',()=>{cursor.classList.add('clicking');ring.classList.add('clicking')});
+document.addEventListener('mouseup',()=>{cursor.classList.remove('clicking');ring.classList.remove('clicking')});
+document.querySelectorAll('a,button,.feature-card,.stat-item,.nav-cta').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.classList.add('hovering');ring.classList.add('hovering')});
+  el.addEventListener('mouseleave',()=>{cursor.classList.remove('hovering');ring.classList.remove('hovering')});
+});
+
+// STARFIELD
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let W,H,stars=[];
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener('resize',()=>{resize();initStars()});
+function initStars(){
+  stars=[];
+  const n=Math.floor(W*H/3800);
+  for(let i=0;i<n;i++){
+    stars.push({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      r:Math.random()*1.5+0.2,
+      a:Math.random()*0.8+0.1,
+      speed:Math.random()*0.4+0.05,
+      twinkle:Math.random()*Math.PI*2,
+      type:Math.floor(Math.random()*3)
+    });
+  }
+}
+initStars();
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  stars.forEach(s=>{
+    s.twinkle+=s.speed*0.035;
+    const alpha=s.a*(0.4+0.6*Math.sin(s.twinkle));
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    if(s.type===0) ctx.fillStyle=`rgba(192,132,252,${alpha})`;
+    else if(s.type===1) ctx.fillStyle=`rgba(56,189,248,${alpha})`;
+    else ctx.fillStyle=`rgba(255,255,255,${alpha})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// ── DEMO GUI ──────────────────────────────────────────────
+(function(){
+  const vp      = document.getElementById('demo-viewport');
+  const icon    = document.getElementById('tl-icon');
+  const panel   = document.getElementById('tl-panel');
+  const bar     = document.getElementById('tl-panel-bar');
+  const closeBtn= document.getElementById('tl-close');
+  const actionBtn=document.getElementById('tl-action');
+  const toggle  = document.getElementById('tl-toggle');
+  const thumb   = document.getElementById('tl-thumb');
+  const status  = document.getElementById('tl-status');
+  const hint    = document.getElementById('drag-hint');
+
+  let panelOpen = false;
+  let flyOn     = false;
+  let statusTimer = null;
+
+  /* ── open / close panel ── */
+  function openPanel(){
+    panelOpen = true;
+    panel.style.display = 'flex';
+    hint.style.opacity = '0';
+    icon.style.borderColor = '#7c5cfc';
+    icon.style.boxShadow = '0 0 28px rgba(124,92,252,0.55),inset 0 1px 0 rgba(255,255,255,0.05)';
+    panel.style.animation = 'tlPanelIn 0.22s cubic-bezier(0.16,1,0.3,1) both';
+  }
+  function closePanel(){
+    panelOpen = false;
+    panel.style.display = 'none';
+    hint.style.opacity = '1';
+    icon.style.borderColor = '#4a3a8a';
+    icon.style.boxShadow = '0 0 18px rgba(124,92,252,0.25),inset 0 1px 0 rgba(255,255,255,0.05)';
+  }
+
+  /* ── icon click ── */
+  let iconDragged = false;
+  icon.addEventListener('click', ()=>{ if(!iconDragged){ panelOpen ? closePanel() : openPanel(); } });
+  closeBtn.addEventListener('click', closePanel);
+
+  /* ── action button ── */
+  actionBtn.addEventListener('click', ()=>{
+    status.style.opacity = '1';
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(()=>{ status.style.opacity='0'; }, 2200);
+    actionBtn.style.transform = 'scale(0.96)';
+    setTimeout(()=>{ actionBtn.style.transform=''; }, 150);
+  });
+  actionBtn.addEventListener('mouseenter',()=>{ actionBtn.style.boxShadow='0 4px 22px rgba(124,92,252,0.55)'; });
+  actionBtn.addEventListener('mouseleave',()=>{ actionBtn.style.boxShadow='0 2px 14px rgba(124,92,252,0.35)'; });
+
+  /* ── toggle ── */
+  toggle.addEventListener('click', ()=>{
+    flyOn = !flyOn;
+    toggle.style.background   = flyOn ? 'linear-gradient(135deg,#7c5cfc,#a370fc)' : '#1a1535';
+    toggle.style.borderColor  = flyOn ? '#7c5cfc' : '#2a1f5e';
+    thumb.style.left          = flyOn ? '18px' : '2px';
+    thumb.style.background    = flyOn ? '#fff'  : '#4a3a8a';
+    thumb.style.boxShadow     = flyOn ? '0 0 8px rgba(192,132,252,0.7)' : 'none';
+  });
+
+  /* ── drag: ICON ── */
+  makeDraggable(icon, vp, ()=>{ iconDragged=false; }, ()=>{ iconDragged=true; });
+
+  /* ── drag: PANEL (by bar) ── */
+  makeDraggable(panel, vp, null, null, bar);
+
+  function makeDraggable(el, container, onStart, onMove, handle){
+    const h = handle || el;
+    let dragging=false, ox=0, oy=0;
+    h.addEventListener('mousedown', e=>{
+      if(e.target===closeBtn) return;
+      dragging=true;
+      const r=el.getBoundingClientRect(), cr=container.getBoundingClientRect();
+      ox=e.clientX-(r.left-cr.left);
+      oy=e.clientY-(r.top-cr.top);
+      el.style.cursor='grabbing';
+      if(onStart) onStart();
+    });
+    document.addEventListener('mousemove', e=>{
+      if(!dragging) return;
+      const cr=container.getBoundingClientRect();
+      let nx=e.clientX-cr.left-ox, ny=e.clientY-cr.top-oy;
+      nx=Math.max(0,Math.min(nx,cr.width-el.offsetWidth));
+      ny=Math.max(0,Math.min(ny,cr.height-el.offsetHeight));
+      el.style.left=nx+'px'; el.style.top=ny+'px';
+      el.style.transform='none';
+      if(onMove) onMove();
+    });
+    document.addEventListener('mouseup', ()=>{
+      dragging=false;
+      el.style.cursor= (h===el||h===handle) ? 'grab' : '';
+    });
+    /* touch */
+    h.addEventListener('touchstart', e=>{
+      const t=e.touches[0];
+      dragging=true;
+      const r=el.getBoundingClientRect(), cr=container.getBoundingClientRect();
+      ox=t.clientX-(r.left-cr.left); oy=t.clientY-(r.top-cr.top);
+      if(onStart) onStart();
+    },{passive:true});
+    document.addEventListener('touchmove', e=>{
+      if(!dragging) return;
+      const t=e.touches[0], cr=container.getBoundingClientRect();
+      let nx=t.clientX-cr.left-ox, ny=t.clientY-cr.top-oy;
+      nx=Math.max(0,Math.min(nx,cr.width-el.offsetWidth));
+      ny=Math.max(0,Math.min(ny,cr.height-el.offsetHeight));
+      el.style.left=nx+'px'; el.style.top=ny+'px'; el.style.transform='none';
+      if(onMove) onMove();
+    },{passive:true});
+    document.addEventListener('touchend',()=>{ dragging=false; });
+  }
+
+  /* inject keyframe */
+  const sty=document.createElement('style');
+  sty.textContent=`@keyframes tlPanelIn{from{opacity:0;transform:translate(-50%,-44%) scale(0.93)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}`;
+  document.head.appendChild(sty);
+})();
+// ── END DEMO GUI ───────────────────────────────────────────
+
+// SCROLL REVEAL
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+    }
+  });
+},{threshold:0.08});
+document.querySelectorAll('.feature-card,.stat-item').forEach((el,i)=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(22px)';
+  el.style.transition=`opacity 0.55s ease ${i*0.045}s, transform 0.55s ease ${i*0.045}s, border-color 0.3s, background 0.3s`;
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
