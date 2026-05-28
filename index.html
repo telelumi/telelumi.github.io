@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TLMenu — Audio Loader</title>
-<meta name="description" content="Convert MP3 URLs to Roblox-compatible loadstring audio snippets.">
+<meta name="description" content="Drag & drop MP3 files to convert them into Roblox-compatible audio scripts.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@350;420;500;600;700&family=JetBrains+Mono:wght@420;520;620&display=swap" rel="stylesheet">
 <style>
@@ -68,7 +68,6 @@ nav {
 }
 
 .nav-brand-dot { width: 7px; height: 7px; background: var(--text2); border-radius: 2px; }
-
 .nav-brand-text {
   font-family: var(--mono);
   font-size: 13px;
@@ -77,7 +76,6 @@ nav {
 }
 
 .nav-links { display: flex; align-items: center; gap: 24px; list-style: none; }
-
 .nav-links a {
   font-size: 12.5px;
   font-weight: 450;
@@ -85,7 +83,6 @@ nav {
   text-decoration: none;
   transition: color var(--transition);
 }
-
 .nav-links a:hover, .nav-links a.active { color: var(--text); }
 
 /* ── Main ───────────────────────────────────────────────── */
@@ -138,62 +135,131 @@ nav {
   margin-bottom: 22px;
 }
 
-/* ── Input ──────────────────────────────────────────────── */
-.input-group {
-  display: flex;
-  gap: 8px;
+/* ── Drop Zone ──────────────────────────────────────────── */
+.drop-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 40px 24px;
+  text-align: center;
+  transition: all var(--transition);
+  cursor: pointer;
+  position: relative;
   margin-bottom: 16px;
 }
 
-.input-field {
-  flex: 1;
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 10px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  outline: none;
-  transition: border-color var(--transition);
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.015);
 }
 
-.input-field::placeholder { color: var(--text3); }
-.input-field:focus { border-color: rgba(255, 255, 255, 0.2); }
-
-.btn {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 520;
-  padding: 10px 18px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: all var(--transition);
-  white-space: nowrap;
-  border: none;
+.drop-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  opacity: 0.35;
 }
 
-.btn-primary {
-  background: var(--text);
-  color: var(--bg);
+.drop-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: var(--text2);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.btn-primary:hover { opacity: 0.85; }
-
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border2);
+.drop-text {
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--text2);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
 }
 
-.btn-ghost:hover { border-color: rgba(255, 255, 255, 0.15); color: var(--text); }
+.drop-sub {
+  font-size: 11.5px;
+  color: var(--text3);
+  letter-spacing: -0.01em;
+}
+
+.file-input-hidden {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── File Info ──────────────────────────────────────────── */
+.file-info {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.file-info-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.file-info-icon svg {
+  width: 18px; height: 18px;
+  stroke: var(--text2);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.file-info-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.file-info-name {
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 450;
+}
+
+.file-info-meta {
+  color: var(--text3);
+  font-size: 11px;
+}
+
+.file-clear {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 15px;
+  padding: 4px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition);
+  line-height: 1;
+}
+
+.file-clear:hover { color: #c06060; }
 
 /* ── Audio Player ───────────────────────────────────────── */
 .audio-preview {
   display: none;
   margin-bottom: 16px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -203,41 +269,22 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .audio-preview-title {
   font-size: 12px;
   font-weight: 500;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 400px;
 }
-
-.audio-preview-close {
-  background: none;
-  border: none;
-  color: var(--text3);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 6px;
-  transition: color var(--transition);
-}
-
-.audio-preview-close:hover { color: #c06060; }
 
 .audio-player {
   width: 100%;
-  height: 32px;
+  height: 30px;
   border-radius: var(--radius-sm);
 }
 
-.audio-player::-webkit-media-controls-panel {
-  background: var(--surface3);
-}
-
+.audio-player::-webkit-media-controls-panel { background: var(--surface3); }
 .audio-player::-webkit-media-controls-current-time-display,
 .audio-player::-webkit-media-controls-time-remaining-display {
   color: var(--text2);
@@ -245,49 +292,46 @@ nav {
   font-size: 10px;
 }
 
-/* ── Code Output ────────────────────────────────────────── */
-.code-output {
+/* ── Progress ───────────────────────────────────────────── */
+.progress-wrap {
   display: none;
+  margin-bottom: 16px;
 }
 
-.code-header {
+.progress-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 7px;
 }
 
-.code-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text3);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.code-block {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  padding: 16px 18px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  line-height: 1.9;
+.progress-stage {
+  font-size: 11px;
   color: var(--text2);
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-break: break-all;
-  max-height: 300px;
-  overflow-y: auto;
-  position: relative;
 }
 
-.code-block .kw { color: var(--accent2); font-weight: 520; }
-.code-block .str { color: #7a9e8a; }
-.code-block .fn { color: #c0a060; }
-.code-block .comment { color: var(--text3); }
+.progress-pct {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text3);
+}
 
-/* ── Method Selector ────────────────────────────────────── */
+.progress-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent2);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── Method Tabs ────────────────────────────────────────── */
 .method-tabs {
   display: flex;
   gap: 1px;
@@ -319,7 +363,101 @@ nav {
 
 .method-tab:hover:not(.active) { color: var(--text2); }
 
+/* ── Generate Button ────────────────────────────────────── */
+.btn-generate {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 520;
+  padding: 11px 20px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-generate:hover:not(:disabled) { opacity: 0.85; }
+.btn-generate:disabled { opacity: 0.3; pointer-events: none; }
+
+.btn-spinner {
+  width: 14px; height: 14px;
+  border: 1.5px solid rgba(0,0,0,0.2);
+  border-top-color: rgba(0,0,0,0.6);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Code Output ────────────────────────────────────────── */
+.code-output {
+  display: none;
+  margin-top: 16px;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.code-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.btn-copy {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 520;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all var(--transition);
+}
+
+.btn-copy:hover { border-color: rgba(255, 255, 255, 0.15); color: var(--text); }
+
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: var(--text2);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.code-block .kw { color: var(--accent2); font-weight: 520; }
+.code-block .str { color: #7a9e8a; }
+.code-block .fn { color: #c0a060; }
+.code-block .comment { color: var(--text3); }
+
 /* ── History ────────────────────────────────────────────── */
+.history-card { display: none; }
+
 .history-list {
   display: flex;
   flex-direction: column;
@@ -338,13 +476,9 @@ nav {
   border-radius: var(--radius-sm);
 }
 
-.history-item-icon {
-  opacity: 0.4;
-  flex-shrink: 0;
-  font-size: 16px;
-}
+.history-item-icon { opacity: 0.4; flex-shrink: 0; font-size: 15px; }
 
-.history-item-url {
+.history-item-name {
   flex: 1;
   font-family: var(--mono);
   font-size: 10.5px;
@@ -354,10 +488,13 @@ nav {
   text-overflow: ellipsis;
 }
 
-.history-item-actions {
-  display: flex;
-  gap: 6px;
+.history-item-size {
+  font-size: 10px;
+  color: var(--text3);
+  flex-shrink: 0;
 }
+
+.history-item-actions { display: flex; gap: 4px; }
 
 .history-btn {
   font-family: var(--mono);
@@ -409,7 +546,6 @@ footer {
 
 @media (max-width: 600px) {
   .card { padding: 20px 16px; }
-  .input-group { flex-direction: column; }
   .method-tabs { flex-wrap: wrap; }
 }
 </style>
@@ -432,47 +568,84 @@ footer {
 <div class="main">
   <div class="wrapper">
 
-    <!-- Input Card -->
+    <!-- Main Card -->
     <div class="card">
       <div class="card-label">Audio Loader</div>
       <div class="card-title">MP3 to Script</div>
-      <div class="card-sub">Paste an MP3 URL and get a ready-to-use Roblox loadstring.</div>
+      <div class="card-sub">Drag & drop an MP3 file — get a ready-to-use Roblox script with the audio embedded as base64.</div>
 
+      <!-- Drop Zone -->
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="drop-text">Drop MP3 here or click to browse</div>
+        <div class="drop-sub">MP3 · WAV · OGG · FLAC — Max 25 MB</div>
+        <input type="file" id="fileInput" class="file-input-hidden" accept="audio/mp3,audio/wav,audio/ogg,audio/flac,audio/mpeg,audio/*" />
+      </div>
+
+      <!-- File Info -->
+      <div class="file-info" id="fileInfo">
+        <div class="file-info-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <div class="file-info-text">
+          <div class="file-info-name" id="fileName"></div>
+          <div class="file-info-meta" id="fileMeta"></div>
+        </div>
+        <button class="file-clear" id="fileClear">✕</button>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-header">
+          <span class="progress-stage" id="progressStage">Reading file...</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <!-- Audio Preview -->
+      <div class="audio-preview" id="audioPreview">
+        <div class="audio-preview-header">
+          <span class="audio-preview-title">▶ Preview</span>
+        </div>
+        <audio class="audio-player" id="audioPlayer" controls preload="metadata"></audio>
+      </div>
+
+      <!-- Method Tabs -->
       <div class="method-tabs" id="methodTabs">
         <button class="method-tab active" data-method="sound">Sound Object</button>
         <button class="method-tab" data-method="loadstring">Loadstring</button>
         <button class="method-tab" data-method="custom">Custom Script</button>
       </div>
 
-      <div class="input-group">
-        <input type="text" class="input-field" id="urlInput" placeholder="https://example.com/audio.mp3" autocomplete="off" spellcheck="false" />
-        <button class="btn btn-primary" id="generateBtn">Generate</button>
-      </div>
-
-      <!-- Audio Preview -->
-      <div class="audio-preview" id="audioPreview">
-        <div class="audio-preview-header">
-          <span class="audio-preview-title" id="audioTitle">Audio Preview</span>
-          <button class="audio-preview-close" id="audioClose">✕</button>
-        </div>
-        <audio class="audio-player" id="audioPlayer" controls preload="metadata">
-          Your browser does not support the audio element.
-        </audio>
-      </div>
+      <!-- Generate -->
+      <button class="btn-generate" id="generateBtn" disabled>
+        <span id="btnLabel">Generate Script</span>
+        <div class="btn-spinner" id="btnSpin"></div>
+      </button>
 
       <!-- Code Output -->
       <div class="code-output" id="codeOutput">
         <div class="code-header">
           <span class="code-label">Generated Script</span>
-          <button class="btn btn-ghost" id="copyBtn">Copy</button>
+          <button class="btn-copy" id="copyBtn">Copy</button>
         </div>
         <div class="code-block" id="codeBlock"></div>
       </div>
     </div>
 
-    <!-- History Card -->
-    <div class="card" id="historyCard" style="display:none;">
-      <div class="card-label">Recent</div>
+    <!-- History -->
+    <div class="card history-card" id="historyCard">
+      <div class="card-label">Recent Files</div>
       <div class="history-list" id="historyList"></div>
     </div>
 
@@ -488,195 +661,346 @@ footer {
 
 <script>
 // ── State ─────────────────────────────────────────────────
+let chosenFile = null;
+let fileBase64 = null;
 let currentMethod = 'sound';
-let currentUrl = '';
 
-// ── DOM Refs ──────────────────────────────────────────────
-const methodTabs    = document.getElementById('methodTabs');
-const urlInput      = document.getElementById('urlInput');
-const generateBtn   = document.getElementById('generateBtn');
-const audioPreview  = document.getElementById('audioPreview');
-const audioTitle    = document.getElementById('audioTitle');
-const audioPlayer   = document.getElementById('audioPlayer');
-const audioClose    = document.getElementById('audioClose');
-const codeOutput    = document.getElementById('codeOutput');
-const codeBlock     = document.getElementById('codeBlock');
-const copyBtn       = document.getElementById('copyBtn');
-const historyCard   = document.getElementById('historyCard');
-const historyList   = document.getElementById('historyList');
-const toast         = document.getElementById('toast');
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+const ALLOWED_TYPES = ['audio/mpeg', 'audio/wav', 'audio/wave', 'audio/ogg', 'audio/flac', 'audio/x-wav', 'audio/mp3', 'audio/mp4', 'audio/aac'];
 
-// ── Methods ───────────────────────────────────────────────
-methodTabs.addEventListener('click', e => {
+// ── DOM ───────────────────────────────────────────────────
+const dropZone     = document.getElementById('dropZone');
+const fileInput    = document.getElementById('fileInput');
+const fileInfo     = document.getElementById('fileInfo');
+const fileName     = document.getElementById('fileName');
+const fileMeta     = document.getElementById('fileMeta');
+const fileClear    = document.getElementById('fileClear');
+const progressWrap = document.getElementById('progressWrap');
+const progressFill = document.getElementById('progressFill');
+const progressPct  = document.getElementById('progressPct');
+const progressStage= document.getElementById('progressStage');
+const audioPreview = document.getElementById('audioPreview');
+const audioPlayer  = document.getElementById('audioPlayer');
+const generateBtn  = document.getElementById('generateBtn');
+const btnLabel     = document.getElementById('btnLabel');
+const btnSpin      = document.getElementById('btnSpin');
+const codeOutput   = document.getElementById('codeOutput');
+const codeBlock    = document.getElementById('codeBlock');
+const copyBtn      = document.getElementById('copyBtn');
+const historyCard  = document.getElementById('historyCard');
+const historyList  = document.getElementById('historyList');
+const toast        = document.getElementById('toast');
+
+// ── Helpers ───────────────────────────────────────────────
+function fmtSize(b) {
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  return (b / 1048576).toFixed(2) + ' MB';
+}
+
+function fmtDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function escapeStr(s) {
+  return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ── File Handling ─────────────────────────────────────────
+function handleFile(file) {
+  if (!file) return;
+
+  if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(mp3|wav|ogg|flac|m4a|aac)$/i)) {
+    showToast('Unsupported format. Use MP3, WAV, OGG, or FLAC.');
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    showToast('File too large. Maximum: 25 MB');
+    return;
+  }
+
+  chosenFile = file;
+
+  // Show file info
+  fileName.textContent = file.name;
+  fileMeta.textContent = fmtSize(file.size);
+  fileInfo.style.display = 'flex';
+  generateBtn.disabled = false;
+  codeOutput.style.display = 'none';
+
+  // Preview audio
+  const url = URL.createObjectURL(file);
+  audioPlayer.src = url;
+  audioPreview.style.display = 'block';
+
+  // Get duration when loaded
+  audioPlayer.addEventListener('loadedmetadata', function() {
+    if (audioPlayer.duration && isFinite(audioPlayer.duration)) {
+      fileMeta.textContent = fmtSize(file.size) + ' · ' + fmtDuration(audioPlayer.duration);
+    }
+  }, { once: true });
+}
+
+function clearFile() {
+  chosenFile = null;
+  fileBase64 = null;
+  fileInput.value = '';
+  fileInfo.style.display = 'none';
+  progressWrap.style.display = 'none';
+  audioPlayer.src = '';
+  audioPreview.style.display = 'none';
+  codeOutput.style.display = 'none';
+  generateBtn.disabled = true;
+}
+
+// ── Drop Zone Events ──────────────────────────────────────
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (file) handleFile(file);
+});
+
+fileClear.addEventListener('click', clearFile);
+
+// ── Method Tabs ───────────────────────────────────────────
+document.getElementById('methodTabs').addEventListener('click', e => {
   if (e.target.classList.contains('method-tab')) {
     document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
     e.target.classList.add('active');
     currentMethod = e.target.dataset.method;
-    if (currentUrl) generateCode(currentUrl);
   }
 });
 
+// ── Read File as Base64 ───────────────────────────────────
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 // ── Generate ──────────────────────────────────────────────
-function isValidAudioUrl(url) {
-  return /^https?:\/\/.+\.(mp3|wav|ogg|flac|m4a|aac|wma|opus)(\?.*)?$/i.test(url) ||
-         /^rbxassetid:\/\/\d+$/i.test(url);
-}
+generateBtn.addEventListener('click', async () => {
+  if (!chosenFile) return;
 
-function extractFileName(url) {
+  generateBtn.disabled = true;
+  btnLabel.textContent = 'Reading file...';
+  btnSpin.style.display = 'block';
+  progressWrap.style.display = 'block';
+  progressFill.style.width = '15%';
+  progressPct.textContent = '15%';
+  progressStage.textContent = 'Reading file...';
+  codeOutput.style.display = 'none';
+
   try {
-    const path = new URL(url).pathname;
-    const name = path.split('/').pop() || 'audio';
-    return decodeURIComponent(name).replace(/\.\w+$/, '');
-  } catch {
-    const match = url.match(/([^/]+)\.\w+(\?|$)/);
-    return match ? match[1] : 'audio';
-  }
-}
+    // Read as data URL
+    const dataUrl = await readFileAsBase64(chosenFile);
 
-function escapeString(str) {
-  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-}
+    progressFill.style.width = '50%';
+    progressPct.textContent = '50%';
+    progressStage.textContent = 'Encoding...';
 
-function generateCode(url) {
-  currentUrl = url;
-  const fileName = extractFileName(url);
-  const escapedUrl = escapeString(url);
+    // Extract base64 and mime type
+    const base64 = dataUrl.split(',')[1];
+    const mimeType = dataUrl.match(/data:([^;]+)/)[1];
 
-  let code = '';
+    progressFill.style.width = '85%';
+    progressPct.textContent = '85%';
+    progressStage.textContent = 'Generating script...';
 
-  switch (currentMethod) {
-    case 'sound':
-      code = `-- Play audio: ${fileName}
+    fileBase64 = base64;
+    const safeName = escapeStr(chosenFile.name.replace(/\.\w+$/, ''));
+    const dataUri = 'data:' + mimeType + ';base64,' + base64;
+
+    let code = '';
+    switch (currentMethod) {
+      case 'sound':
+        code = `-- Audio: ${safeName}
+-- Generated by TLMenu Audio Loader
+
 local Sound = Instance.new("Sound")
-Sound.SoundId = "${escapedUrl}"
+Sound.SoundId = "${dataUri}"
 Sound.Volume = 1
-Sound.Parent = game:GetService("Workspace") -- or game.Players.LocalPlayer.PlayerGui
+Sound.Parent = game:GetService("Workspace")
 Sound:Play()
 
--- Optional: Destroy after playback
 Sound.Ended:Connect(function()
     Sound:Destroy()
-end)`;
-      break;
+end)
 
-    case 'loadstring':
-      code = `-- Audio Loadstring for ${fileName}
--- Paste this into your executor:
+--[[
+Controls:
+  Sound:Pause()
+  Sound:Resume()
+  Sound:Stop()
+  Sound.Volume = 0.5
+  Sound.Looped = true
+]]`;
+        break;
 
-loadstring(game:HttpGet("${escapedUrl}"))();
+      case 'loadstring':
+        code = `-- Audio Loadstring: ${safeName}
+-- Generated by TLMenu Audio Loader
 
--- Or for direct sound loading:
-local s = Instance.new("Sound", workspace)
-s.SoundId = "${escapedUrl}"
-s.Volume = 0.5
-s.Looped = true
-s:Play()`;
-      break;
+local audioData = "${dataUri}"
 
-    case 'custom':
-      code = `-- Custom Audio Script: ${fileName}
--- Configure below:
-
-local AUDIO_URL = "${escapedUrl}"
-local VOLUME = 0.5
-local LOOPED = false
-local PARENT = game:GetService("Workspace")
-
--- Create and play
 local Sound = Instance.new("Sound")
-Sound.SoundId = AUDIO_URL
-Sound.Volume = VOLUME
-Sound.Looped = LOOPED
-Sound.Parent = PARENT
+Sound.SoundId = audioData
+Sound.Volume = 0.5
+Sound.Looped = false
+Sound.Parent = game:GetService("Workspace")
 
 Sound.Loaded:Connect(function()
-    print("[TLMenu] Loaded: ${fileName}")
+    print("[TLMenu] Playing: ${safeName}")
     Sound:Play()
 end)
 
 Sound.Ended:Connect(function()
-    if not LOOPED then
-        print("[TLMenu] Finished: ${fileName}")
+    if not Sound.Looped then
+        Sound:Destroy()
+    end
+end)`;
+        break;
+
+      case 'custom':
+        code = `-- Custom Audio Script: ${safeName}
+-- Generated by TLMenu Audio Loader
+
+-- ── Configuration ──────────────────────
+local CONFIG = {
+    Url = "${dataUri}",
+    Volume = 0.5,
+    Looped = false,
+    Parent = game:GetService("Workspace"),
+    AutoPlay = true,
+    DestroyOnEnd = true,
+}
+
+-- ── Create Sound ────────────────────────
+local Sound = Instance.new("Sound")
+Sound.SoundId = CONFIG.Url
+Sound.Volume = CONFIG.Volume
+Sound.Looped = CONFIG.Looped
+Sound.Parent = CONFIG.Parent
+
+-- ── Events ──────────────────────────────
+Sound.Loaded:Connect(function()
+    if CONFIG.AutoPlay then
+        Sound:Play()
+    end
+end)
+
+Sound.Ended:Connect(function()
+    if CONFIG.DestroyOnEnd and not CONFIG.Looped then
         Sound:Destroy()
     end
 end)
 
--- Controls (uncomment to use):
--- Sound:Pause()
--- Sound:Resume()
--- Sound:Stop()
--- Sound:Destroy()`;
-      break;
+-- ── Public API ──────────────────────────
+local Audio = {}
+
+function Audio:Play()
+    Sound:Play()
+end
+
+function Audio:Pause()
+    Sound:Pause()
+end
+
+function Audio:Stop()
+    Sound:Stop()
+end
+
+function Audio:SetVolume(vol)
+    Sound.Volume = math.clamp(vol, 0, 1)
+end
+
+function Audio:Destroy()
+    Sound:Destroy()
+end
+
+return Audio`;
+        break;
+    }
+
+    progressFill.style.width = '100%';
+    progressPct.textContent = '100%';
+    progressStage.textContent = 'Done!';
+
+    setTimeout(() => {
+      progressWrap.style.display = 'none';
+      codeBlock.innerHTML = highlightLua(code);
+      codeOutput.style.display = 'block';
+      btnLabel.textContent = 'Generate Script';
+      btnSpin.style.display = 'none';
+      generateBtn.disabled = false;
+
+      saveToHistory(chosenFile.name, chosenFile.size);
+      renderHistory();
+    }, 300);
+
+  } catch (err) {
+    progressWrap.style.display = 'none';
+    btnLabel.textContent = 'Generate Script';
+    btnSpin.style.display = 'none';
+    generateBtn.disabled = false;
+    showToast('Error reading file: ' + err.message);
   }
+});
 
-  codeBlock.innerHTML = syntaxHighlight(code);
-  codeOutput.style.display = 'block';
-  updateAudioPreview(url, fileName);
-  saveToHistory(url, fileName);
-  renderHistory();
-}
-
-function syntaxHighlight(code) {
+// ── Syntax Highlight ──────────────────────────────────────
+function highlightLua(code) {
   return code
-    .replace(/--.*$/gm, match => `<span class="comment">${match}</span>`)
+    .replace(/--.*$/gm, m => `<span class="comment">${m}</span>`)
     .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="str">$1</span>')
     .replace(/('(?:[^'\\]|\\.)*')/g, '<span class="str">$1</span>')
     .replace(/\b(local|function|end|if|then|else|elseif|for|while|do|return|break|nil|true|false|and|or|not)\b/g, '<span class="kw">$1</span>')
     .replace(/\b(game|workspace|Instance|Sound|Vector3|CFrame|UDim2|Color3|Enum|math|string|table|print|wait|task|pcall|tostring|tonumber)\b/g, '<span class="fn">$1</span>');
 }
 
-// ── Audio Preview ─────────────────────────────────────────
-function updateAudioPreview(url, name) {
-  audioTitle.textContent = name;
-  audioPlayer.src = url;
-  audioPreview.style.display = 'block';
-}
-
-audioClose.addEventListener('click', () => {
-  audioPlayer.pause();
-  audioPlayer.src = '';
-  audioPreview.style.display = 'none';
-});
-
 // ── Copy ──────────────────────────────────────────────────
 copyBtn.addEventListener('click', () => {
-  const rawCode = codeBlock.textContent;
-  navigator.clipboard.writeText(rawCode).then(() => showToast('Copied to clipboard ✓'));
-});
-
-// ── Generate Button ───────────────────────────────────────
-generateBtn.addEventListener('click', () => {
-  const url = urlInput.value.trim();
-  if (!url) { showToast('Please enter a URL'); return; }
-  if (!isValidAudioUrl(url)) {
-    // Try anyway — might be a direct link without extension
-    if (url.startsWith('http')) {
-      generateCode(url);
-      return;
-    }
-    showToast('Invalid URL format');
-    return;
-  }
-  generateCode(url);
-});
-
-// Enter key
-urlInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') generateBtn.click();
+  navigator.clipboard.writeText(codeBlock.textContent).then(() => showToast('Copied to clipboard ✓'));
 });
 
 // ── History ───────────────────────────────────────────────
 function getHistory() {
-  try { return JSON.parse(localStorage.getItem('tlmenu_audio_history') || '[]'); }
+  try { return JSON.parse(localStorage.getItem('tlmenu_audio_files') || '[]'); }
   catch { return []; }
 }
 
-function saveToHistory(url, name) {
+function saveToHistory(name, size) {
   const h = getHistory();
-  // Remove duplicates
-  const filtered = h.filter(item => item.url !== url);
-  filtered.unshift({ url, name, ts: Date.now() });
-  localStorage.setItem('tlmenu_audio_history', JSON.stringify(filtered.slice(0, 15)));
+  h.unshift({ name, size, ts: Date.now() });
+  localStorage.setItem('tlmenu_audio_files', JSON.stringify(h.slice(0, 20)));
 }
 
 function renderHistory() {
@@ -687,36 +1011,20 @@ function renderHistory() {
   historyList.innerHTML = h.map((item, i) => `
     <div class="history-item">
       <span class="history-item-icon">🎵</span>
-      <span class="history-item-url" title="${item.url}">${item.name}</span>
+      <span class="history-item-name">${item.name}</span>
+      <span class="history-item-size">${fmtSize(item.size)}</span>
       <div class="history-item-actions">
-        <button class="history-btn" onclick="loadHistoryItem(${i})">Load</button>
         <button class="history-btn" onclick="removeHistoryItem(${i})" style="color:#c06060;">✕</button>
       </div>
     </div>
   `).join('');
 }
 
-function loadHistoryItem(index) {
-  const h = getHistory();
-  if (h[index]) {
-    urlInput.value = h[index].url;
-    generateCode(h[index].url);
-  }
-}
-
 function removeHistoryItem(index) {
   const h = getHistory();
   h.splice(index, 1);
-  localStorage.setItem('tlmenu_audio_history', JSON.stringify(h));
+  localStorage.setItem('tlmenu_audio_files', JSON.stringify(h));
   renderHistory();
-}
-
-// ── Toast ─────────────────────────────────────────────────
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toast._timeout);
-  toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
 // ── Init ──────────────────────────────────────────────────
