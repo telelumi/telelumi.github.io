@@ -3,183 +3,682 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLMenu – Nametag Uploader</title>
+<title>TLMenu — Nametag Uploader</title>
 <meta name="description" content="Upload MP4 nametag videos for use in Roblox via TLMenu.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#04030d;--surface:#0d0b1e;--surface2:#110f25;
-  --border:#2a1f5e;--border2:#4a3a8a;
-  --accent:#7c5cfc;--accent2:#c084fc;--accent3:#38bdf8;
-  --gold:#f59e0b;--green:#4ade80;--red:#f87171;
-  --text:#e8e4ff;--muted:#6b5f9e;
-  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Montserrat',sans-serif;
+:root {
+  --bg: #0a0a0c;
+  --surface: #111114;
+  --surface-elevated: #16161a;
+  --surface-hover: #1c1c21;
+  --border: #222228;
+  --border-light: #2a2a32;
+  --text-primary: #e4e4e9;
+  --text-secondary: #8e8e9a;
+  --text-tertiary: #5c5c6a;
+  --accent: #6c6c80;
+  --accent-hover: #85859c;
+  --success: #3d8c5e;
+  --success-bg: rgba(61, 140, 94, 0.08);
+  --error: #c24a4a;
+  --error-bg: rgba(194, 74, 74, 0.08);
+  --warning: #a67c3c;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+  --transition: 160ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:none;min-height:100vh;display:flex;flex-direction:column}
-a,button,label,input{cursor:none}
 
-/* CURSOR */
-#cursor{position:fixed;top:0;left:0;will-change:transform;width:12px;height:12px;background:var(--accent2);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;mix-blend-mode:screen}
-#cursor-ring{position:fixed;top:0;left:0;will-change:transform;width:36px;height:36px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .12s,height .12s,border-color .12s;mix-blend-mode:screen}
-#cursor.click{width:6px;height:6px;background:var(--gold)}
-#cursor-ring.click{width:50px;height:50px;border-color:var(--gold)}
-#cursor.hover{width:18px;height:18px;background:var(--accent3)}
-#cursor-ring.hover{width:52px;height:52px;border-color:var(--accent3)}
-#stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(4,3,13,.85);backdrop-filter:blur(20px)}
-.nav-logo{font-family:var(--mono);font-size:1.1rem;letter-spacing:.1em;font-weight:700;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
-.nav-links{display:flex;gap:2rem;list-style:none}
-.nav-links a{font-size:.78rem;text-decoration:none;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;transition:color .2s;font-family:var(--mono)}
-.nav-links a:hover{color:var(--accent2)}
-.nav-cta{font-family:var(--mono);font-size:.7rem;padding:.55rem 1.4rem;border:1px solid var(--accent);background:transparent;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:all .3s}
-.nav-cta:hover{border-color:var(--accent2);box-shadow:0 0 20px rgba(124,92,252,.4);color:var(--text)}
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-/* LAYOUT */
-.main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:8rem 2rem 4rem;position:relative;z-index:10}
-.wrapper{width:100%;max-width:640px;display:flex;flex-direction:column;gap:1.2rem}
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  letter-spacing: -0.01em;
+}
 
-/* CARD BASE */
-.card{background:var(--surface);border:1px solid var(--border);padding:2rem 2.2rem;position:relative;transition:border-color .3s}
-.card:hover{border-color:var(--border2)}
+/* ── Navigation ─────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(10, 10, 12, 0.82);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
 
-/* TOKEN CARD */
-.token-card{display:flex;flex-direction:column;gap:1rem}
-.card-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:.2rem}
-.card-title{font-family:var(--display);font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.8rem}
-.token-row{display:flex;gap:.7rem;align-items:center}
-.token-input{flex:1;font-family:var(--mono);font-size:.72rem;padding:.8rem 1rem;background:rgba(0,0,0,.35);border:1px solid var(--border2);color:var(--text);letter-spacing:.04em;outline:none;transition:border-color .2s}
-.token-input:focus{border-color:var(--accent)}
-.token-input::placeholder{color:var(--muted)}
-.token-save{font-family:var(--mono);font-size:.68rem;padding:.8rem 1.4rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;letter-spacing:.08em;text-transform:uppercase;transition:all .3s;white-space:nowrap}
-.token-save:hover{box-shadow:0 0 20px rgba(192,132,252,.4);transform:translateY(-1px)}
-.token-status{font-family:var(--mono);font-size:.62rem;letter-spacing:.08em}
-.token-status.ok{color:var(--green)}
-.token-status.no{color:var(--red)}
-.token-help{font-family:var(--mono);font-size:.6rem;color:var(--muted);line-height:1.8;letter-spacing:.03em}
-.token-help a{color:var(--accent3);text-decoration:none}
-.token-help a:hover{text-decoration:underline}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
 
-/* UPLOAD CARD */
-.upload-card h2{font-family:var(--display);font-size:1.8rem;font-weight:900;color:var(--text);margin-bottom:.4rem}
-.upload-card .sub{font-size:.82rem;color:var(--muted);font-family:var(--mono);margin-bottom:1.8rem;letter-spacing:.04em}
+.nav-brand-mark {
+  width: 8px;
+  height: 8px;
+  background: var(--text-secondary);
+  border-radius: 3px;
+}
 
-/* DROP ZONE */
-.drop-zone{border:1.5px dashed var(--border2);padding:2.2rem 2rem;text-align:center;transition:all .3s;position:relative;margin-bottom:1.2rem;background:rgba(124,92,252,.03)}
-.drop-zone.drag-over,.drop-zone:hover{border-color:var(--accent);background:rgba(124,92,252,.07);box-shadow:0 0 20px rgba(124,92,252,.12)}
-.drop-icon svg{width:40px;height:40px;stroke:var(--accent2);fill:none;stroke-width:1.3;opacity:.6;margin-bottom:.8rem}
-.drop-text{font-family:var(--mono);font-size:.72rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.3rem}
-.drop-sub{font-family:var(--mono);font-size:.58rem;color:var(--border2);letter-spacing:.05em}
-.file-input{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.nav-brand-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+}
 
-/* FILE INFO */
-.file-info{display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);padding:.85rem 1rem;margin-bottom:1.2rem;align-items:center;gap:.9rem}
-.file-info-icon svg{width:20px;height:20px;stroke:var(--accent2);fill:none;stroke-width:1.5;flex-shrink:0}
-.file-info-text{font-family:var(--mono);font-size:.68rem;line-height:1.6;flex:1;overflow:hidden}
-.file-info-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.file-info-size{color:var(--muted);font-size:.6rem}
-.file-clear{background:none;border:none;color:var(--muted);font-size:.9rem;padding:.25rem;transition:color .2s;flex-shrink:0}
-.file-clear:hover{color:var(--red)}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
 
-/* PROGRESS */
-.progress-wrap{display:none;margin-bottom:1.2rem}
-.progress-meta{font-family:var(--mono);font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.45rem;display:flex;justify-content:space-between;align-items:center}
-.progress-bar{height:2px;background:var(--border);position:relative;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));transition:width .12s ease}
-.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shim 1s infinite}
-@keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.nav-links a {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition);
+}
 
-/* BTN */
-.btn{font-family:var(--mono);font-size:.78rem;padding:1rem 2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;letter-spacing:.1em;text-transform:uppercase;transition:all .3s;width:100%;display:flex;align-items:center;justify-content:center;gap:.7rem}
-.btn:hover:not(:disabled){box-shadow:0 0 30px rgba(192,132,252,.5);transform:translateY(-2px)}
-.btn:disabled{opacity:.45;pointer-events:none}
-.btn-spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
+.nav-links a:hover { color: var(--text-primary); }
 
-/* RESULT */
-.result{display:none;margin-top:1.2rem;border:1px solid rgba(74,222,128,.25);background:rgba(74,222,128,.04);padding:1.4rem}
-.result-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}
-.result-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0}
-.result-title{font-family:var(--mono);font-size:.65rem;color:var(--green);letter-spacing:.12em;text-transform:uppercase}
-.result-lbl{font-family:var(--mono);font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem}
-.result-url{font-family:var(--mono);font-size:.73rem;padding:.85rem;background:rgba(0,0,0,.45);border:1px solid var(--border);color:var(--accent3);word-break:break-all;user-select:all;line-height:1.6;margin-bottom:.8rem}
-.copy-btn{font-family:var(--mono);font-size:.68rem;padding:.7rem 1.2rem;background:var(--border2);color:#fff;border:none;width:100%;transition:all .2s;text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;gap:.6rem}
-.copy-btn:hover{background:var(--accent)}
-.copy-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.nav-action {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all var(--transition);
+  letter-spacing: 0.02em;
+}
 
-/* ERROR */
-.err{display:none;margin-top:1rem;padding:.85rem 1rem;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25);font-family:var(--mono);font-size:.68rem;color:var(--red);letter-spacing:.04em;line-height:1.8}
+.nav-action:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.1);
+}
 
-/* UPLOADS LIST */
-.uploads-card{display:none}
-.uploads-list{display:flex;flex-direction:column;gap:.5rem;max-height:260px;overflow-y:auto}
-.uploads-list::-webkit-scrollbar{width:3px}
-.uploads-list::-webkit-scrollbar-track{background:var(--border)}
-.uploads-list::-webkit-scrollbar-thumb{background:var(--border2)}
-.upload-item{display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;background:rgba(0,0,0,.25);border:1px solid var(--border);font-family:var(--mono);font-size:.65rem}
-.upload-item-name{flex:1;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.upload-item-copy{background:none;border:1px solid var(--border2);color:var(--muted);font-family:var(--mono);font-size:.58rem;padding:.3rem .7rem;letter-spacing:.06em;transition:all .2s;white-space:nowrap}
-.upload-item-copy:hover{border-color:var(--accent2);color:var(--accent2)}
+/* ── Layout ─────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 88px 20px 48px;
+}
 
-/* FOOTER */
-footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
-.footer-logo{font-family:var(--mono);font-size:.9rem;font-weight:700;letter-spacing:.1em;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.footer-copy{font-size:.68rem;color:var(--muted);font-family:var(--mono);letter-spacing:.06em}
+.wrapper {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
 
-@media(max-width:768px){
-  nav{padding:1rem 1.5rem}
-  .nav-links{display:none}
-  .card{padding:1.5rem}
-  footer{flex-direction:column;gap:1rem;text-align:center}
+/* ── Cards ──────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 32px;
+}
+
+.card:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.card:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.card:only-child { border-radius: var(--radius-lg); }
+
+.card + .card { border-top: none; }
+
+.card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 650;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.card-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+  letter-spacing: -0.01em;
+}
+
+/* ── Token Section ──────────────────────────────────────── */
+.token-row {
+  display: flex;
+  gap: 8px;
+}
+
+.token-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition);
+  letter-spacing: 0.02em;
+}
+
+.token-input::placeholder { color: var(--text-tertiary); }
+.token-input:focus { border-color: var(--accent); }
+
+.btn-primary {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 10px 18px;
+  background: var(--text-primary);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: all var(--transition);
+}
+
+.btn-primary:hover { background: #c8c8d0; }
+.btn-primary:disabled { opacity: 0.3; pointer-events: none; }
+
+.token-status {
+  font-size: 12px;
+  margin-top: 10px;
+  font-weight: 450;
+  letter-spacing: -0.01em;
+}
+
+.token-status.ok { color: var(--success); }
+.token-status.no { color: var(--text-tertiary); }
+
+.token-help {
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+}
+
+.token-help a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  transition: border-color var(--transition);
+}
+
+.token-help a:hover { border-color: rgba(255, 255, 255, 0.3); }
+.token-help strong { font-weight: 550; color: var(--text-secondary); }
+
+/* ── Drop Zone ──────────────────────────────────────────── */
+.drop-zone {
+  border: 1.5px dashed var(--border-light);
+  border-radius: var(--radius);
+  padding: 36px 24px;
+  text-align: center;
+  transition: all var(--transition);
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.drop-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  opacity: 0.35;
+}
+
+.drop-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.drop-text {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.drop-sub {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  letter-spacing: -0.01em;
+}
+
+.file-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── File Info ──────────────────────────────────────────── */
+.file-info {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.file-info-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.file-info-icon svg { width: 18px; height: 18px; }
+
+.file-info-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.file-info-name {
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 450;
+}
+
+.file-info-size {
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.file-clear {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 15px;
+  padding: 4px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition);
+  line-height: 1;
+}
+
+.file-clear:hover { color: var(--error); }
+
+/* ── Progress ───────────────────────────────────────────── */
+.progress-wrap {
+  display: none;
+  margin-bottom: 16px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-stage {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  letter-spacing: -0.01em;
+}
+
+.progress-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.progress-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ── Upload Button ──────────────────────────────────────── */
+.btn-upload {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 0.02em;
+  transition: all var(--transition);
+}
+
+.btn-upload:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.btn-upload:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Result ─────────────────────────────────────────────── */
+.result {
+  display: none;
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: var(--success-bg);
+  border: 1px solid rgba(61, 140, 94, 0.15);
+  border-radius: var(--radius-sm);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.result-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  flex-shrink: 0;
+}
+
+.result-title {
+  font-size: 11.5px;
+  font-weight: 550;
+  color: var(--success);
+  letter-spacing: -0.01em;
+}
+
+.result-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 7px;
+}
+
+.result-url {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  word-break: break-all;
+  user-select: all;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.btn-copy {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  letter-spacing: 0.02em;
+  transition: all var(--transition);
+}
+
+.btn-copy:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.btn-copy svg { width: 13px; height: 13px; opacity: 0.6; flex-shrink: 0; }
+
+/* ── Error ──────────────────────────────────────────────── */
+.error-msg {
+  display: none;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--error-bg);
+  border: 1px solid rgba(194, 74, 74, 0.15);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  color: var(--error);
+  letter-spacing: -0.01em;
+  line-height: 1.6;
+}
+
+/* ── Uploads History ────────────────────────────────────── */
+.uploads-card { display: none; }
+
+.uploads-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.uploads-list::-webkit-scrollbar { width: 3px; }
+.uploads-list::-webkit-scrollbar-track { background: transparent; }
+.uploads-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.upload-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.upload-item-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.3;
+  flex-shrink: 0;
+}
+
+.upload-item-icon svg { width: 16px; height: 16px; }
+
+.upload-item-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.upload-item-copy {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  background: none;
+  border: 1px solid var(--border-light);
+  color: var(--text-tertiary);
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: all var(--transition);
+}
+
+.upload-item-copy:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-text {
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  letter-spacing: -0.01em;
+}
+
+.footer-brand {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.03em;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  nav { padding: 0 16px; }
+  .nav-links { gap: 16px; }
+  .nav-links a { font-size: 11.5px; }
+  .card { padding: 22px 18px; }
+  .card-title { font-size: 18px; }
+  footer { flex-direction: column; gap: 8px; text-align: center; padding: 14px 16px; }
 }
 </style>
 </head>
 <body>
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
-<canvas id="stars-canvas"></canvas>
 
 <nav>
-  <a href="../" class="nav-logo">TLMenu</a>
+  <a href="../" class="nav-brand">
+    <span class="nav-brand-mark"></span>
+    <span class="nav-brand-text">TLMenu</span>
+  </a>
   <ul class="nav-links">
     <li><a href="../#features">Features</a></li>
     <li><a href="../#preview">Preview</a></li>
   </ul>
-  <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" target="_blank" class="nav-cta">Get Script</a>
+  <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" target="_blank" class="nav-action">Get Script</a>
 </nav>
 
 <div class="main">
   <div class="wrapper">
 
-    <!-- TOKEN CARD -->
-    <div class="card token-card" id="tokenCard">
-      <div class="card-label">// Einmalige Einrichtung</div>
-      <div class="card-title">GitHub Access Token</div>
+    <!-- Token -->
+    <div class="card" id="tokenCard">
+      <div class="card-label">Einrichtung</div>
+      <div class="card-title">GitHub Token</div>
+      <div class="card-subtitle">Wird nur in deinem Browser gespeichert.</div>
       <div class="token-row">
         <input type="password" id="tokenInput" class="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false"/>
-        <button class="token-save" id="tokenSave">Speichern</button>
+        <button class="btn-primary" id="tokenSave">Speichern</button>
       </div>
-      <div id="tokenStatus" class="token-status no">⬤ Kein Token gespeichert</div>
+      <div id="tokenStatus" class="token-status no">Kein Token gespeichert</div>
       <div class="token-help">
-        Token erstellen: <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a>
-        → "Generate new token (classic)" → Haken bei <strong>repo</strong> → Generate → hier einfügen.<br>
-        Das Token wird nur in deinem Browser gespeichert (localStorage).
+        <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → Generate new token (classic) → <strong>repo</strong> → Generate
       </div>
     </div>
 
-    <!-- UPLOAD CARD -->
-    <div class="card upload-card">
-      <div class="card-label">// Nametag Uploader</div>
-      <h2>MP4 hochladen</h2>
-      <p class="sub">Datei wird direkt in dein GitHub Repo geladen — permanenter Link für Roblox.</p>
+    <!-- Upload -->
+    <div class="card">
+      <div class="card-label">Upload</div>
+      <div class="card-title">MP4 hochladen</div>
+      <div class="card-subtitle">Datei wird direkt in dein GitHub Repo geladen.</div>
 
       <div class="drop-zone" id="dropZone">
         <div class="drop-icon">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
         </div>
         <div class="drop-text">MP4 hierher ziehen oder klicken</div>
         <div class="drop-sub">Maximal 50 MB · nur .mp4</div>
@@ -188,7 +687,9 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-i
 
       <div class="file-info" id="fileInfo">
         <div class="file-info-icon">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
         </div>
         <div class="file-info-text">
           <div class="file-info-name" id="fileName"></div>
@@ -198,38 +699,39 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-i
       </div>
 
       <div class="progress-wrap" id="progressWrap">
-        <div class="progress-meta">
-          <span id="progressStage">Datei wird gelesen...</span>
-          <span id="progressPct">0%</span>
+        <div class="progress-header">
+          <span class="progress-stage" id="progressStage">Datei wird gelesen...</span>
+          <span class="progress-pct" id="progressPct">0%</span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       </div>
 
-      <button class="btn" id="uploadBtn" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      <button class="btn-upload" id="uploadBtn" disabled>
         <span id="btnLabel">In GitHub hochladen</span>
-        <div class="btn-spin" id="btnSpin"></div>
+        <div class="btn-spinner" id="btnSpin"></div>
       </button>
 
       <div class="result" id="result">
-        <div class="result-head">
+        <div class="result-header">
           <div class="result-dot"></div>
-          <div class="result-title">Upload erfolgreich!</div>
+          <div class="result-title">Upload erfolgreich</div>
         </div>
-        <div class="result-lbl">Direkter Link für Roblox:</div>
+        <div class="result-label">Direkter Link</div>
         <div class="result-url" id="resultUrl"></div>
-        <button class="copy-btn" id="copyBtn">
-          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <button class="btn-copy" id="copyBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
           Link kopieren
         </button>
       </div>
 
-      <div class="err" id="errMsg"></div>
+      <div class="error-msg" id="errMsg"></div>
     </div>
 
-    <!-- UPLOADS HISTORY -->
+    <!-- History -->
     <div class="card uploads-card" id="uploadsCard">
-      <div class="card-label" style="margin-bottom:1rem">// Meine Uploads</div>
+      <div class="card-label">Meine Uploads</div>
       <div class="uploads-list" id="uploadsList"></div>
     </div>
 
@@ -237,38 +739,15 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-i
 </div>
 
 <footer>
-  <div class="footer-logo">TLMenu</div>
-  <div class="footer-copy">© 2026 TLMenu</div>
+  <span class="footer-text">Nametag Uploader</span>
+  <span class="footer-brand">TLMenu</span>
 </footer>
 
 <script>
-// ── CURSOR ──────────────────────────────────────────────────
-const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.transform=`translate(calc(${mx}px - 50%),calc(${my}px - 50%))`;},{passive:true});
-(function a(){rx+=(mx-rx)*.22;ry+=(my-ry)*.22;ring.style.transform=`translate(calc(${rx}px - 50%),calc(${ry}px - 50%))`;requestAnimationFrame(a)})();
-document.addEventListener('mousedown',()=>{cur.classList.add('click');ring.classList.add('click')});
-document.addEventListener('mouseup',()=>{cur.classList.remove('click');ring.classList.remove('click')});
-document.querySelectorAll('a,button,label,input,.drop-zone').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{cur.classList.add('hover');ring.classList.add('hover')});
-  el.addEventListener('mouseleave',()=>{cur.classList.remove('hover');ring.classList.remove('hover')});
-});
-
-// ── STARS ───────────────────────────────────────────────────
-const cv=document.getElementById('stars-canvas'),cx=cv.getContext('2d');
-let W,H,stars=[];
-function rsz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
-rsz();window.addEventListener('resize',()=>{rsz();mkS()});
-function mkS(){stars=[];const n=Math.floor(W*H/4000);for(let i=0;i<n;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.2,a:Math.random()*.7+.15,sp:Math.random()*.4+.05,tw:Math.random()*Math.PI*2,t:Math.floor(Math.random()*3)});}
-mkS();
-(function drw(){cx.clearRect(0,0,W,H);stars.forEach(s=>{s.tw+=s.sp*.03;const a=s.a*(.4+.6*Math.sin(s.tw));cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle=s.t===0?`rgba(192,132,252,${a})`:s.t===1?`rgba(56,189,248,${a})`:`rgba(255,255,255,${a})`;cx.fill();});requestAnimationFrame(drw);})();
-
-// ── CONFIG ──────────────────────────────────────────────────
 const OWNER = 'telelumi';
 const REPO  = 'telelumi.github.io';
 const FOLDER= 'nametag-uploads';
 
-// ── TOKEN ───────────────────────────────────────────────────
 const tokenInput  = document.getElementById('tokenInput');
 const tokenSave   = document.getElementById('tokenSave');
 const tokenStatus = document.getElementById('tokenStatus');
@@ -276,7 +755,7 @@ const tokenStatus = document.getElementById('tokenStatus');
 function getToken(){return localStorage.getItem('gh_nametag_pat')||'';}
 function setTokenStatus(ok){
   tokenStatus.className='token-status '+(ok?'ok':'no');
-  tokenStatus.textContent=ok?'⬤ Token gespeichert':'⬤ Kein Token gespeichert';
+  tokenStatus.textContent=ok?'Token gespeichert':'Kein Token gespeichert';
 }
 setTokenStatus(!!getToken());
 if(getToken()) tokenInput.value='•'.repeat(20);
@@ -290,7 +769,6 @@ tokenSave.addEventListener('click',()=>{
   uploadBtn.disabled=!chosenFile;
 });
 
-// ── FILE PICK ───────────────────────────────────────────────
 const dropZone   = document.getElementById('dropZone');
 const fileInput  = document.getElementById('fileInput');
 const fileInfo   = document.getElementById('fileInfo');
@@ -317,8 +795,8 @@ function hideErr(){errMsg.style.display='none';}
 
 function setFile(f){
   if(!f)return;
-  if(!f.name.toLowerCase().endsWith('.mp4')){showErr('Nur .mp4 Dateien erlaubt!');return;}
-  if(f.size>52428800){showErr('Datei zu groß! Maximum: 50 MB');return;}
+  if(!f.name.toLowerCase().endsWith('.mp4')){showErr('Nur .mp4 Dateien erlaubt.');return;}
+  if(f.size>52428800){showErr('Datei zu groß. Maximum: 50 MB');return;}
   chosenFile=f;
   fileName.textContent=f.name;
   fileSize.textContent=fmtSize(f.size);
@@ -334,11 +812,10 @@ dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over')
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');if(e.dataTransfer.files[0])setFile(e.dataTransfer.files[0]);});
 fileClear.addEventListener('click',()=>{chosenFile=null;fileInput.value='';fileInfo.style.display='none';uploadBtn.disabled=true;result.style.display='none';hideErr();});
 
-// ── UPLOAD via GitHub API ───────────────────────────────────
 uploadBtn.addEventListener('click', async ()=>{
   if(!chosenFile) return;
   const pat=getToken();
-  if(!pat){showErr('Kein GitHub Token gespeichert! Bitte oben eintragen.');return;}
+  if(!pat){showErr('Kein GitHub Token gespeichert.');return;}
 
   hideErr();
   uploadBtn.disabled=true;
@@ -351,7 +828,6 @@ uploadBtn.addEventListener('click', async ()=>{
   result.style.display='none';
 
   try{
-    // Step 1: Read file as base64
     const base64 = await new Promise((res,rej)=>{
       const r=new FileReader();
       r.onload=()=>res(r.result.split(',')[1]);
@@ -364,12 +840,10 @@ uploadBtn.addEventListener('click', async ()=>{
     progressStage.textContent='Datei wird hochgeladen...';
     btnLabel.textContent='Hochladen...';
 
-    // Step 2: Build filename with timestamp to avoid conflicts
     const ts = Date.now();
     const safeName = chosenFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
     const uploadPath = `${FOLDER}/${ts}_${safeName}`;
 
-    // Step 3: GitHub API PUT
     const resp = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${uploadPath}`,{
       method:'PUT',
       headers:{
@@ -389,12 +863,11 @@ uploadBtn.addEventListener('click', async ()=>{
 
     if(!resp.ok){
       const err=await resp.json().catch(()=>({message:resp.statusText}));
-      if(resp.status===401) throw new Error('Token ungültig oder abgelaufen. Bitte neues Token eingeben.');
-      if(resp.status===404) throw new Error('Repo nicht gefunden. Stelle sicher, dass du auf telelumi eingeloggt bist.');
+      if(resp.status===401) throw new Error('Token ungültig oder abgelaufen.');
+      if(resp.status===404) throw new Error('Repo nicht gefunden.');
       throw new Error(err.message||`HTTP ${resp.status}`);
     }
 
-    // Step 4: Build Pages URL
     const finalUrl=`https://${OWNER}.github.io/${uploadPath}`;
 
     progressFill.style.width='100%';
@@ -408,33 +881,30 @@ uploadBtn.addEventListener('click', async ()=>{
       btnSpin.style.display='none';
       uploadBtn.disabled=false;
 
-      // Save to history
       saveHistory(safeName, finalUrl);
       renderHistory();
-    },400);
+    },350);
 
   }catch(e){
     progressWrap.style.display='none';
     btnLabel.textContent='In GitHub hochladen';
     btnSpin.style.display='none';
     uploadBtn.disabled=false;
-    showErr('Fehler: '+e.message);
+    showErr(e.message);
   }
 });
 
-// ── COPY ────────────────────────────────────────────────────
 copyBtn.addEventListener('click',()=>{
   navigator.clipboard.writeText(resultUrl.textContent).then(()=>{
-    copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg> Kopiert!`;
-    copyBtn.style.cssText='background:rgba(74,222,128,.2);color:var(--green)';
+    copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg> Kopiert`;
+    copyBtn.style.cssText='background:rgba(61,140,94,0.12);color:var(--success);border-color:rgba(61,140,94,0.2)';
     setTimeout(()=>{
-      copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Link kopieren`;
-      copyBtn.style.cssText='background:var(--border2);color:#fff';
-    },2200);
+      copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Link kopieren`;
+      copyBtn.style.cssText='background:rgba(255,255,255,0.04);color:var(--text-primary);border-color:rgba(255,255,255,0.08)';
+    },1800);
   });
 });
 
-// ── HISTORY ─────────────────────────────────────────────────
 const uploadsCard=document.getElementById('uploadsCard');
 const uploadsList=document.getElementById('uploadsList');
 
@@ -450,9 +920,9 @@ function renderHistory(){
   uploadsCard.style.display='block';
   uploadsList.innerHTML=h.map(item=>`
     <div class="upload-item">
-      <div class="file-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="1.5" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="upload-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
       <div class="upload-item-name">${item.name}</div>
-      <button class="upload-item-copy" onclick="navigator.clipboard.writeText('${item.url}');this.textContent='✓';setTimeout(()=>this.textContent='Kopieren',1500)">Kopieren</button>
+      <button class="upload-item-copy" onclick="navigator.clipboard.writeText('${item.url}');this.textContent='✓';setTimeout(()=>this.textContent='Kopieren',1400)">Kopieren</button>
     </div>
   `).join('');
 }
