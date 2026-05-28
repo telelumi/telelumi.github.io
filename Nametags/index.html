@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLMenu - Nametag Uploader</title>
+<title>TLMenu – Nametag Uploader</title>
+<meta name="description" content="Upload MP4 nametag videos for use in Roblox via TLMenu.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Montserrat:wght@400;600;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#04030d;
-  --bg2:#080618;
   --surface:#0d0b1e;
   --border:#2a1f5e;
   --border2:#4a3a8a;
@@ -18,6 +18,8 @@
   --accent2:#c084fc;
   --accent3:#38bdf8;
   --gold:#f59e0b;
+  --green:#4ade80;
+  --red:#f87171;
   --text:#e8e4ff;
   --muted:#6b5f9e;
   --mono:'Space Mono',monospace;
@@ -28,67 +30,101 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:none;min-height:100vh;display:flex;flex-direction:column}
 a,button,label{cursor:none}
 
-/* CUSTOM CURSOR */
-#cursor{position:fixed;top:0;left:0;will-change:transform;width:12px;height:12px;background:var(--accent2);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width 0.15s,height 0.15s,background 0.15s;mix-blend-mode:screen}
-#cursor-ring{position:fixed;top:0;left:0;will-change:transform;width:36px;height:36px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width 0.12s,height 0.12s,border-color 0.12s;mix-blend-mode:screen}
-#cursor.clicking{width:6px;height:6px;background:var(--gold)}
-#cursor-ring.clicking{width:50px;height:50px;border-color:var(--gold)}
-#cursor.hovering{width:18px;height:18px;background:var(--accent3)}
-#cursor-ring.hovering{width:52px;height:52px;border-color:var(--accent3)}
+/* CURSOR */
+#cursor{position:fixed;top:0;left:0;will-change:transform;width:12px;height:12px;background:var(--accent2);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .15s,height .15s,background .15s;mix-blend-mode:screen}
+#cursor-ring{position:fixed;top:0;left:0;will-change:transform;width:36px;height:36px;border:1px solid var(--accent);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .12s,height .12s,border-color .12s;mix-blend-mode:screen}
+#cursor.click{width:6px;height:6px;background:var(--gold)}
+#cursor-ring.click{width:50px;height:50px;border-color:var(--gold)}
+#cursor.hover{width:18px;height:18px;background:var(--accent3)}
+#cursor-ring.hover{width:52px;height:52px;border-color:var(--accent3)}
 
 #stars-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(4,3,13,0.85);backdrop-filter:blur(20px)}
-.nav-logo{font-family:var(--mono);font-size:1.1rem;letter-spacing:0.1em;font-weight:700;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(4,3,13,.85);backdrop-filter:blur(20px)}
+.nav-logo{font-family:var(--mono);font-size:1.1rem;letter-spacing:.1em;font-weight:700;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
 .nav-links{display:flex;gap:2rem;list-style:none}
-.nav-links a{font-size:0.78rem;text-decoration:none;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;font-family:var(--mono)}
+.nav-links a{font-size:.78rem;text-decoration:none;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;transition:color .2s;font-family:var(--mono)}
 .nav-links a:hover{color:var(--accent2)}
-.nav-cta{font-family:var(--mono);font-size:0.7rem;padding:0.55rem 1.4rem;border:1px solid var(--accent);background:transparent;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;transition:all 0.3s;position:relative;overflow:hidden}
-.nav-cta:hover{border-color:var(--accent2);box-shadow:0 0 20px rgba(124,92,252,0.4);color:var(--text)}
+.nav-cta{font-family:var(--mono);font-size:.7rem;padding:.55rem 1.4rem;border:1px solid var(--accent);background:transparent;color:var(--accent2);letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:all .3s}
+.nav-cta:hover{border-color:var(--accent2);box-shadow:0 0 20px rgba(124,92,252,.4);color:var(--text)}
 
-/* MAIN CONTENT */
-.upload-container{flex:1;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 4rem;position:relative;z-index:10}
-.upload-box{background:var(--surface);border:1px solid var(--border);padding:3rem;max-width:600px;width:100%;text-align:center;position:relative;box-shadow:0 0 40px rgba(124,92,252,0.1);transition:border-color 0.3s}
-.upload-box:hover{border-color:var(--border2)}
-.upload-box::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:700px;height:350px;background:radial-gradient(ellipse,rgba(124,92,252,0.06),transparent);pointer-events:none;z-index:-1}
+/* MAIN */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 4rem;position:relative;z-index:10}
 
-.upload-header{font-family:var(--display);font-size:2.2rem;font-weight:900;margin-bottom:0.5rem;color:var(--text)}
-.upload-sub{font-size:0.85rem;color:var(--muted);font-family:var(--mono);margin-bottom:2.5rem;letter-spacing:0.05em}
+.card{background:var(--surface);border:1px solid var(--border);padding:3rem;max-width:620px;width:100%;position:relative;box-shadow:0 0 60px rgba(124,92,252,.1)}
+.card::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(124,92,252,.07),transparent);pointer-events:none;z-index:-1}
 
-.file-input-wrapper{margin-bottom:2rem;position:relative}
-.file-input{width:0.1px;height:0.1px;opacity:0;overflow:hidden;position:absolute;z-index:-1}
-.file-label{display:inline-flex;align-items:center;justify-content:center;gap:1rem;font-family:var(--mono);font-size:0.8rem;padding:1.2rem 2.5rem;background:rgba(124,92,252,0.08);color:var(--accent2);border:1px dashed var(--border2);letter-spacing:0.1em;text-transform:uppercase;transition:all 0.3s;width:100%}
-.file-label:hover{background:rgba(124,92,252,0.15);border-color:var(--accent);color:var(--text);box-shadow:0 0 20px rgba(124,92,252,0.2)}
-.file-label svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.5}
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;color:var(--accent2);border:1px solid var(--border2);padding:.35rem .9rem;margin-bottom:1.8rem;text-transform:uppercase;background:rgba(124,92,252,.06)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);box-shadow:0 0 8px var(--accent2);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 
-.selected-file{font-family:var(--mono);font-size:0.75rem;color:var(--text);margin-bottom:2rem;background:rgba(0,0,0,0.3);padding:0.8rem;border-radius:4px;border:1px solid var(--border);display:none;word-break:break-all}
+h1{font-family:var(--display);font-size:2rem;font-weight:900;margin-bottom:.5rem;color:var(--text)}
+.sub{font-size:.82rem;color:var(--muted);font-family:var(--mono);margin-bottom:2.5rem;letter-spacing:.04em;line-height:1.7}
 
-.btn-primary{font-family:var(--mono);font-size:0.8rem;padding:1rem 2.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.3s;width:100%;display:none;align-items:center;justify-content:center;gap:0.8rem}
-.btn-primary:hover{box-shadow:0 0 35px rgba(192,132,252,0.55);transform:translateY(-2px)}
-.btn-primary:disabled{opacity:0.6;transform:none;box-shadow:none;pointer-events:none}
+/* DROP ZONE */
+.drop-zone{border:1.5px dashed var(--border2);padding:2.5rem 2rem;text-align:center;transition:all .3s;position:relative;margin-bottom:1.5rem;background:rgba(124,92,252,.03)}
+.drop-zone.drag-over{border-color:var(--accent);background:rgba(124,92,252,.08);box-shadow:0 0 24px rgba(124,92,252,.18)}
+.drop-icon{width:48px;height:48px;margin:0 auto 1rem;opacity:.5}
+.drop-icon svg{width:100%;height:100%;stroke:var(--accent2);fill:none;stroke-width:1.2}
+.drop-text{font-family:var(--mono);font-size:.72rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.5rem}
+.drop-sub{font-family:var(--mono);font-size:.6rem;color:var(--border2);letter-spacing:.06em}
+.file-input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:none}
 
-/* LOADER */
-.loader{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none}
+/* FILE INFO */
+.file-info{display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);padding:.9rem 1.1rem;margin-bottom:1.5rem;display:none;align-items:center;gap:1rem}
+.file-info-icon svg{width:22px;height:22px;stroke:var(--accent2);fill:none;stroke-width:1.5;flex-shrink:0}
+.file-info-text{font-family:var(--mono);font-size:.7rem;line-height:1.6;flex:1;overflow:hidden}
+.file-info-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-info-size{color:var(--muted)}
+.file-clear{background:none;border:none;color:var(--muted);font-size:1rem;padding:.2rem;transition:color .2s;flex-shrink:0}
+.file-clear:hover{color:var(--red)}
+
+/* PROGRESS BAR */
+.progress-wrap{display:none;margin-bottom:1.5rem}
+.progress-label{font-family:var(--mono);font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;display:flex;justify-content:space-between}
+.progress-bar{height:3px;background:var(--border);position:relative;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));transition:width .15s ease;position:relative}
+.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shimmer 1.2s infinite}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* BUTTON */
+.btn{font-family:var(--mono);font-size:.78rem;padding:1rem 2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;letter-spacing:.1em;text-transform:uppercase;transition:all .3s;width:100%;display:flex;align-items:center;justify-content:center;gap:.8rem;position:relative;overflow:hidden}
+.btn:hover:not(:disabled){box-shadow:0 0 35px rgba(192,132,252,.5);transform:translateY(-2px)}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* RESULT */
-.result-container{margin-top:2rem;display:none;text-align:left}
-.result-label{font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
-.result-url{font-family:var(--mono);font-size:0.75rem;padding:1rem;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--accent3);word-break:break-all;user-select:all}
-.copy-btn{font-family:var(--mono);font-size:0.7rem;padding:0.7rem;background:var(--border2);color:#fff;border:none;margin-top:0.8rem;width:100%;transition:background 0.2s;text-transform:uppercase;letter-spacing:0.1em}
+.result{display:none;margin-top:1.5rem;border:1px solid var(--border2);background:rgba(124,92,252,.05);padding:1.4rem}
+.result-header{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.result-check{width:18px;height:18px;border-radius:50%;background:rgba(74,222,128,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.result-check svg{width:11px;height:11px;stroke:var(--green);fill:none;stroke-width:2.5}
+.result-title{font-family:var(--mono);font-size:.68rem;color:var(--green);letter-spacing:.1em;text-transform:uppercase}
+.result-label{font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.45rem}
+.result-url{font-family:var(--mono);font-size:.75rem;padding:.9rem;background:rgba(0,0,0,.4);border:1px solid var(--border);color:var(--accent3);word-break:break-all;user-select:all;line-height:1.5;margin-bottom:.8rem}
+.copy-btn{font-family:var(--mono);font-size:.7rem;padding:.7rem 1.2rem;background:var(--border2);color:#fff;border:none;width:100%;transition:all .2s;text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;gap:.6rem}
 .copy-btn:hover{background:var(--accent)}
+.copy-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ERROR */
+.error-msg{display:none;margin-top:1.2rem;padding:.9rem 1.1rem;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.3);font-family:var(--mono);font-size:.7rem;color:var(--red);letter-spacing:.05em;line-height:1.7}
+
+/* NOTE */
+.note{margin-top:1.8rem;padding:.9rem 1rem;background:rgba(56,189,248,.04);border:1px solid rgba(56,189,248,.15);font-family:var(--mono);font-size:.63rem;color:var(--muted);letter-spacing:.05em;line-height:1.8}
+.note span{color:var(--accent3)}
 
 /* FOOTER */
-footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;background:var(--bg)}
-.footer-logo{font-family:var(--mono);font-size:0.9rem;font-weight:700;letter-spacing:0.1em;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.footer-copy{font-size:0.68rem;color:var(--muted);font-family:var(--mono);letter-spacing:0.06em}
+footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.footer-logo{font-family:var(--mono);font-size:.9rem;font-weight:700;letter-spacing:.1em;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer-copy{font-size:.68rem;color:var(--muted);font-family:var(--mono);letter-spacing:.06em}
 
 @media(max-width:768px){
   nav{padding:1rem 1.5rem}
   .nav-links{display:none}
+  .card{padding:2rem 1.5rem}
   footer{flex-direction:column;gap:1rem;text-align:center}
-  .upload-box{padding:2rem}
 }
 </style>
 </head>
@@ -107,34 +143,75 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-i
   <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" target="_blank" class="nav-cta">Get Script</a>
 </nav>
 
-<div class="upload-container">
-  <div class="upload-box">
-    <h1 class="upload-header">Nametag Uploader</h1>
-    <p class="upload-sub">Upload your .mp4 video to get a direct link for Roblox.</p>
+<div class="main">
+  <div class="card">
 
-    <form id="uploadForm" action="https://catbox.moe/user/api.php" method="POST" enctype="multipart/form-data" target="_blank">
-      <input type="hidden" name="reqtype" value="fileupload">
-      <div class="file-input-wrapper">
-        <input type="file" id="file" name="fileToUpload" class="file-input" accept="video/mp4" />
-        <label for="file" class="file-label">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <span>Select MP4 File</span>
-        </label>
+    <div class="badge"><span class="badge-dot"></span>TLMenu · Nametag Tool</div>
+    <h1>Nametag Uploader</h1>
+    <p class="sub">Lade deine .mp4 Datei hoch und erhalte einen direkten Link für Roblox.</p>
+
+    <!-- DROP ZONE -->
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       </div>
-    </form>
+      <div class="drop-text">MP4 hier reinziehen oder klicken</div>
+      <div class="drop-sub">Maximal 512 MB · nur .mp4 Dateien</div>
+      <input type="file" id="fileInput" class="file-input" accept="video/mp4,video/*" />
+    </div>
 
-    <div class="selected-file" id="fileName">No file selected</div>
-    
-    <button id="uploadBtn" class="btn-primary">
-      <span id="btnText">Upload to Catbox</span>
-      <div class="loader" id="loader"></div>
+    <!-- FILE INFO -->
+    <div class="file-info" id="fileInfo">
+      <div class="file-info-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      </div>
+      <div class="file-info-text">
+        <div class="file-info-name" id="fileName">–</div>
+        <div class="file-info-size" id="fileSize">–</div>
+      </div>
+      <button class="file-clear" id="fileClear" title="Auswahl aufheben">✕</button>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label">
+        <span>Hochladen...</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <!-- BUTTON -->
+    <button class="btn" id="uploadBtn" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      <span id="btnLabel">Datei hochladen</span>
+      <div class="btn-spinner" id="btnSpinner"></div>
     </button>
 
-    <div class="result-container" id="resultContainer">
-      <div class="result-label">Direct URL (Copy this to Roblox):</div>
+    <!-- RESULT -->
+    <div class="result" id="result">
+      <div class="result-header">
+        <div class="result-check">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="result-title">Upload erfolgreich!</div>
+      </div>
+      <div class="result-label">Direkter Link für Roblox:</div>
       <div class="result-url" id="resultUrl"></div>
-      <button class="copy-btn" id="copyBtn">Copy Link</button>
+      <button class="copy-btn" id="copyBtn">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Link kopieren
+      </button>
     </div>
+
+    <!-- ERROR -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- NOTE -->
+    <div class="note">
+      <span>ℹ</span> Die Datei wird anonym auf <span>0x0.st</span> hochgeladen. Der Link ist dauerhaft. Nutze den Link direkt als Nametag-URL in TLMenu oder deinem Roblox-Script.
+    </div>
+
   </div>
 </div>
 
@@ -144,107 +221,178 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;align-i
 </footer>
 
 <script>
-// CUSTOM CURSOR
-const cursor = document.getElementById('cursor');
+// ── CURSOR ──────────────────────────────────────────────────
+const cur = document.getElementById('cursor');
 const ring = document.getElementById('cursor-ring');
 let mx=0,my=0,rx=0,ry=0;
 document.addEventListener('mousemove',e=>{
-  mx=e.clientX; my=e.clientY;
-  cursor.style.transform='translate(calc('+mx+'px - 50%), calc('+my+'px - 50%))';
-},{ passive: true });
-function animRing(){
-  rx+=(mx-rx)*0.22;
-  ry+=(my-ry)*0.22;
-  ring.style.transform='translate(calc('+rx+'px - 50%), calc('+ry+'px - 50%))';
-  requestAnimationFrame(animRing);
-}
-animRing();
-document.addEventListener('mousedown',()=>{cursor.classList.add('clicking');ring.classList.add('clicking')});
-document.addEventListener('mouseup',()=>{cursor.classList.remove('clicking');ring.classList.remove('clicking')});
-document.querySelectorAll('a,button,.file-label,.nav-cta').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{cursor.classList.add('hovering');ring.classList.add('hovering')});
-  el.addEventListener('mouseleave',()=>{cursor.classList.remove('hovering');ring.classList.remove('hovering')});
+  mx=e.clientX;my=e.clientY;
+  cur.style.transform=`translate(calc(${mx}px - 50%), calc(${my}px - 50%))`;
+},{passive:true});
+(function anim(){
+  rx+=(mx-rx)*0.22;ry+=(my-ry)*0.22;
+  ring.style.transform=`translate(calc(${rx}px - 50%), calc(${ry}px - 50%))`;
+  requestAnimationFrame(anim);
+})();
+document.addEventListener('mousedown',()=>{cur.classList.add('click');ring.classList.add('click')});
+document.addEventListener('mouseup',()=>{cur.classList.remove('click');ring.classList.remove('click')});
+document.querySelectorAll('a,button,label,.drop-zone,.nav-cta').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.classList.add('hover');ring.classList.add('hover')});
+  el.addEventListener('mouseleave',()=>{cur.classList.remove('hover');ring.classList.remove('hover')});
 });
 
-// STARFIELD
-const canvas = document.getElementById('stars-canvas');
-const ctx = canvas.getContext('2d');
+// ── STARS ───────────────────────────────────────────────────
+const cv=document.getElementById('stars-canvas'),cx=cv.getContext('2d');
 let W,H,stars=[];
-function resize(){
-  W=canvas.width=window.innerWidth;
-  H=canvas.height=window.innerHeight;
-}
-resize();
-window.addEventListener('resize',()=>{resize();initStars()});
-function initStars(){
-  stars=[];
-  const n=Math.floor(W*H/3800);
-  for(let i=0;i<n;i++){
-    stars.push({
-      x:Math.random()*W,
-      y:Math.random()*H,
-      r:Math.random()*1.5+0.2,
-      a:Math.random()*0.8+0.1,
-      speed:Math.random()*0.4+0.05,
-      twinkle:Math.random()*Math.PI*2,
-      type:Math.floor(Math.random()*3)
-    });
+function rsz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+rsz();window.addEventListener('resize',()=>{rsz();mkStars()});
+function mkStars(){stars=[];const n=Math.floor(W*H/3800);for(let i=0;i<n;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.2,a:Math.random()*.8+.1,sp:Math.random()*.4+.05,tw:Math.random()*Math.PI*2,t:Math.floor(Math.random()*3)});}
+mkStars();
+(function drw(){cx.clearRect(0,0,W,H);stars.forEach(s=>{s.tw+=s.sp*.035;const a=s.a*(.4+.6*Math.sin(s.tw));cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle=s.t===0?`rgba(192,132,252,${a})`:s.t===1?`rgba(56,189,248,${a})`:`rgba(255,255,255,${a})`;cx.fill();});requestAnimationFrame(drw);})();
+
+// ── UPLOADER ────────────────────────────────────────────────
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('fileInput');
+const fileInfo   = document.getElementById('fileInfo');
+const fileName   = document.getElementById('fileName');
+const fileSize   = document.getElementById('fileSize');
+const fileClear  = document.getElementById('fileClear');
+const progressWrap=document.getElementById('progressWrap');
+const progressFill=document.getElementById('progressFill');
+const progressPct =document.getElementById('progressPct');
+const uploadBtn  = document.getElementById('uploadBtn');
+const btnLabel   = document.getElementById('btnLabel');
+const btnSpinner = document.getElementById('btnSpinner');
+const result     = document.getElementById('result');
+const resultUrl  = document.getElementById('resultUrl');
+const copyBtn    = document.getElementById('copyBtn');
+const errorMsg   = document.getElementById('errorMsg');
+
+let chosenFile = null;
+
+function fmt(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(2)+' MB';}
+
+function setFile(f){
+  if(!f) return;
+  if(!f.name.toLowerCase().endsWith('.mp4')){
+    showError('Bitte nur .mp4 Dateien hochladen!');
+    return;
   }
+  chosenFile=f;
+  fileName.textContent=f.name;
+  fileSize.textContent=fmt(f.size);
+  fileInfo.style.display='flex';
+  uploadBtn.disabled=false;
+  hideError();
+  result.style.display='none';
 }
-initStars();
-function drawStars(){
-  ctx.clearRect(0,0,W,H);
-  stars.forEach(s=>{
-    s.twinkle+=s.speed*0.035;
-    const alpha=s.a*(0.4+0.6*Math.sin(s.twinkle));
-    ctx.beginPath();
-    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    if(s.type===0) ctx.fillStyle=`rgba(192,132,252,${alpha})`;
-    else if(s.type===1) ctx.fillStyle=`rgba(56,189,248,${alpha})`;
-    else ctx.fillStyle=`rgba(255,255,255,${alpha})`;
-    ctx.fill();
-  });
-  requestAnimationFrame(drawStars);
+
+function clearFile(){
+  chosenFile=null;
+  fileInput.value='';
+  fileInfo.style.display='none';
+  uploadBtn.disabled=true;
+  result.style.display='none';
+  hideError();
 }
-drawStars();
 
-// UPLOADER LOGIC
-const fileInput = document.getElementById('file');
-const fileNameDisplay = document.getElementById('fileName');
-const uploadBtn = document.getElementById('uploadBtn');
-const uploadForm = document.getElementById('uploadForm');
+function showError(msg){
+  errorMsg.textContent=msg;
+  errorMsg.style.display='block';
+}
+function hideError(){errorMsg.style.display='none';}
 
-let selectedFile = null;
-
-fileInput.addEventListener('change', (e) => {
-  if (e.target.files && e.target.files.length > 0) {
-    selectedFile = e.target.files[0];
-    if(selectedFile.type !== "video/mp4" && !selectedFile.name.endsWith('.mp4')){
-       alert("Please select a valid .mp4 file!");
-       fileInput.value = "";
-       selectedFile = null;
-       fileNameDisplay.style.display = 'none';
-       uploadBtn.style.display = 'none';
-       return;
-    }
-    fileNameDisplay.textContent = selectedFile.name + ` (${(selectedFile.size / (1024*1024)).toFixed(2)} MB)`;
-    fileNameDisplay.style.display = 'block';
-    uploadBtn.style.display = 'flex';
-  }
+// File input change
+fileInput.addEventListener('change',e=>{
+  if(e.target.files[0]) setFile(e.target.files[0]);
 });
 
-uploadBtn.addEventListener('click', () => {
-  if (!selectedFile) return;
-  alert("The file will now upload. A new tab will open shortly with your raw video URL (e.g. https://files.catbox.moe/...). Copy that URL for Roblox!");
-  uploadForm.submit();
-  
-  // reset after slight delay
-  setTimeout(() => {
-    fileInput.value = "";
-    selectedFile = null;
-    fileNameDisplay.style.display = 'none';
-    uploadBtn.style.display = 'none';
-  }, 2000);
+// Drag & Drop
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f) setFile(f);
+});
+
+fileClear.addEventListener('click',clearFile);
+
+// ── UPLOAD via XMLHttpRequest (shows real progress) ─────────
+uploadBtn.addEventListener('click',()=>{
+  if(!chosenFile) return;
+
+  // UI: uploading state
+  uploadBtn.disabled=true;
+  btnLabel.textContent='Hochladen...';
+  btnSpinner.style.display='block';
+  progressWrap.style.display='block';
+  progressFill.style.width='0%';
+  progressPct.textContent='0%';
+  result.style.display='none';
+  hideError();
+
+  const fd=new FormData();
+  fd.append('file', chosenFile);
+
+  const xhr=new XMLHttpRequest();
+
+  xhr.upload.addEventListener('progress',e=>{
+    if(e.lengthComputable){
+      const pct=Math.round(e.loaded/e.total*100);
+      progressFill.style.width=pct+'%';
+      progressPct.textContent=pct+'%';
+    }
+  });
+
+  xhr.addEventListener('load',()=>{
+    progressWrap.style.display='none';
+    btnSpinner.style.display='none';
+    btnLabel.textContent='Datei hochladen';
+
+    if(xhr.status===200){
+      const url=xhr.responseText.trim();
+      if(url.startsWith('http')){
+        resultUrl.textContent=url;
+        result.style.display='block';
+        uploadBtn.disabled=false;
+      } else {
+        showError('Unerwartete Antwort vom Server: '+url);
+        uploadBtn.disabled=false;
+      }
+    } else {
+      showError('Upload fehlgeschlagen (HTTP '+xhr.status+'). Versuche es erneut.');
+      uploadBtn.disabled=false;
+    }
+  });
+
+  xhr.addEventListener('error',()=>{
+    progressWrap.style.display='none';
+    btnSpinner.style.display='none';
+    btnLabel.textContent='Datei hochladen';
+    showError('Netzwerkfehler beim Hochladen. Prüfe deine Internetverbindung.');
+    uploadBtn.disabled=false;
+  });
+
+  xhr.open('POST','https://0x0.st');
+  xhr.send(fd);
+});
+
+// ── COPY BUTTON ─────────────────────────────────────────────
+copyBtn.addEventListener('click',()=>{
+  const url=resultUrl.textContent;
+  if(!url) return;
+  navigator.clipboard.writeText(url).then(()=>{
+    copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg> Kopiert!`;
+    copyBtn.style.background='rgba(74,222,128,.25)';
+    copyBtn.style.color='var(--green)';
+    setTimeout(()=>{
+      copyBtn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Link kopieren`;
+      copyBtn.style.background='var(--border2)';
+      copyBtn.style.color='#fff';
+    },2200);
+  });
 });
 </script>
 </body>
