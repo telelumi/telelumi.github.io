@@ -1,0 +1,10 @@
+-- OWNER
+["3242332433"] = { display = "TL Owner", role = "Administrator" },
+-- ADMINS
+["you2iubdfisub"] = { display = "TL Admin", role = "Administrator" },
+
+-- DEVELOPER  
+["DevMaster"] = { display = "TL Developer", role = "Developer" },
+
+-- MODERATOREN
+["ModHelper"] = { display = "TL Moderator", role = "Moderator" },
