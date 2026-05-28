@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLMenu — Audio Loader</title>
-<meta name="description" content="Drag & drop MP3 files to convert them into Roblox-compatible audio scripts.">
+<title>TLMenu — Audio to Roblox</title>
+<meta name="description" content="Convert MP3 files to Roblox-compatible audio scripts with base64 embedding.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@350;420;500;600;700&family=JetBrains+Mono:wght@420;520;620&display=swap" rel="stylesheet">
 <style>
@@ -43,7 +43,6 @@ body {
   flex-direction: column;
 }
 
-/* ── Navigation ─────────────────────────────────────────── */
 nav {
   position: sticky;
   top: 0;
@@ -101,7 +100,6 @@ nav {
   gap: 1px;
 }
 
-/* ── Card ───────────────────────────────────────────────── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -221,25 +219,9 @@ nav {
   stroke-linejoin: round;
 }
 
-.file-info-text {
-  flex: 1;
-  min-width: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.file-info-name {
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 450;
-}
-
-.file-info-meta {
-  color: var(--text3);
-  font-size: 11px;
-}
+.file-info-text { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.5; }
+.file-info-name { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 450; }
+.file-info-meta { color: var(--text3); font-size: 11px; }
 
 .file-clear {
   background: none;
@@ -263,19 +245,6 @@ nav {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-}
-
-.audio-preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.audio-preview-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
 }
 
 .audio-player {
@@ -305,16 +274,8 @@ nav {
   margin-bottom: 7px;
 }
 
-.progress-stage {
-  font-size: 11px;
-  color: var(--text2);
-}
-
-.progress-pct {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--text3);
-}
+.progress-stage { font-size: 11px; color: var(--text2); }
+.progress-pct { font-family: var(--mono); font-size: 10.5px; color: var(--text3); }
 
 .progress-track {
   height: 3px;
@@ -356,11 +317,7 @@ nav {
   text-align: center;
 }
 
-.method-tab.active {
-  background: var(--surface3);
-  color: var(--text);
-}
-
+.method-tab.active { background: var(--surface3); color: var(--text); }
 .method-tab:hover:not(.active) { color: var(--text2); }
 
 /* ── Generate Button ────────────────────────────────────── */
@@ -455,6 +412,20 @@ nav {
 .code-block .fn { color: #c0a060; }
 .code-block .comment { color: var(--text3); }
 
+/* ── Info Box ───────────────────────────────────────────── */
+.info-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: rgba(122, 158, 138, 0.06);
+  border: 1px solid rgba(122, 158, 138, 0.15);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+.info-box strong { color: var(--accent2); font-weight: 550; }
+
 /* ── History ────────────────────────────────────────────── */
 .history-card { display: none; }
 
@@ -477,7 +448,6 @@ nav {
 }
 
 .history-item-icon { opacity: 0.4; flex-shrink: 0; font-size: 15px; }
-
 .history-item-name {
   flex: 1;
   font-family: var(--mono);
@@ -488,12 +458,7 @@ nav {
   text-overflow: ellipsis;
 }
 
-.history-item-size {
-  font-size: 10px;
-  color: var(--text3);
-  flex-shrink: 0;
-}
-
+.history-item-size { font-size: 10px; color: var(--text3); flex-shrink: 0; }
 .history-item-actions { display: flex; gap: 4px; }
 
 .history-btn {
@@ -532,7 +497,6 @@ nav {
 
 .toast.show { opacity: 1; transform: translateY(0); }
 
-/* ── Footer ─────────────────────────────────────────────── */
 footer {
   border-top: 1px solid var(--border);
   padding: 18px 28px;
@@ -568,11 +532,10 @@ footer {
 <div class="main">
   <div class="wrapper">
 
-    <!-- Main Card -->
     <div class="card">
       <div class="card-label">Audio Loader</div>
-      <div class="card-title">MP3 to Script</div>
-      <div class="card-sub">Drag & drop an MP3 file — get a ready-to-use Roblox script with the audio embedded as base64.</div>
+      <div class="card-title">MP3 → Roblox Script</div>
+      <div class="card-sub">Drop an audio file below. You get a ready-to-execute Roblox Lua script that plays your audio in-game using a <strong>data: URI</strong> — no external hosting needed.</div>
 
       <!-- Drop Zone -->
       <div class="drop-zone" id="dropZone">
@@ -583,8 +546,8 @@ footer {
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
         </div>
-        <div class="drop-text">Drop MP3 here or click to browse</div>
-        <div class="drop-sub">MP3 · WAV · OGG · FLAC — Max 25 MB</div>
+        <div class="drop-text">Drop audio file here or click</div>
+        <div class="drop-sub">MP3 · WAV · OGG · FLAC — Max 10 MB</div>
         <input type="file" id="fileInput" class="file-input-hidden" accept="audio/mp3,audio/wav,audio/ogg,audio/flac,audio/mpeg,audio/*" />
       </div>
 
@@ -614,20 +577,16 @@ footer {
 
       <!-- Audio Preview -->
       <div class="audio-preview" id="audioPreview">
-        <div class="audio-preview-header">
-          <span class="audio-preview-title">▶ Preview</span>
-        </div>
         <audio class="audio-player" id="audioPlayer" controls preload="metadata"></audio>
       </div>
 
       <!-- Method Tabs -->
       <div class="method-tabs" id="methodTabs">
-        <button class="method-tab active" data-method="sound">Sound Object</button>
+        <button class="method-tab active" data-method="simple">Simple Play</button>
+        <button class="method-tab" data-method="advanced">Advanced</button>
         <button class="method-tab" data-method="loadstring">Loadstring</button>
-        <button class="method-tab" data-method="custom">Custom Script</button>
       </div>
 
-      <!-- Generate -->
       <button class="btn-generate" id="generateBtn" disabled>
         <span id="btnLabel">Generate Script</span>
         <div class="btn-spinner" id="btnSpin"></div>
@@ -636,10 +595,17 @@ footer {
       <!-- Code Output -->
       <div class="code-output" id="codeOutput">
         <div class="code-header">
-          <span class="code-label">Generated Script</span>
+          <span class="code-label">Your Roblox Script</span>
           <button class="btn-copy" id="copyBtn">Copy</button>
         </div>
         <div class="code-block" id="codeBlock"></div>
+      </div>
+
+      <!-- Info -->
+      <div class="info-box" id="infoBox" style="display:none;">
+        <strong>💡 How to use:</strong> Copy the script above into your Roblox executor.<br>
+        <strong>SoundId</strong> uses a <strong>data: URI</strong> — the audio is embedded directly. No external links, no GitHub uploads.<br>
+        <strong>Note:</strong> Very large files (8+ MB) may hit executor limits. For big files, use the <a href="upload.html" style="color:var(--accent2);">Uploader</a> instead.
       </div>
     </div>
 
@@ -662,18 +628,18 @@ footer {
 <script>
 // ── State ─────────────────────────────────────────────────
 let chosenFile = null;
-let fileBase64 = null;
-let currentMethod = 'sound';
+let fileDataUrl = null;
+let currentMethod = 'simple';
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
-const ALLOWED_TYPES = ['audio/mpeg', 'audio/wav', 'audio/wave', 'audio/ogg', 'audio/flac', 'audio/x-wav', 'audio/mp3', 'audio/mp4', 'audio/aac'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = /\.(mp3|wav|ogg|flac|m4a|aac|wma|opus)$/i;
 
 // ── DOM ───────────────────────────────────────────────────
 const dropZone     = document.getElementById('dropZone');
 const fileInput    = document.getElementById('fileInput');
 const fileInfo     = document.getElementById('fileInfo');
-const fileName     = document.getElementById('fileName');
-const fileMeta     = document.getElementById('fileMeta');
+const fileNameEl   = document.getElementById('fileName');
+const fileMetaEl   = document.getElementById('fileMeta');
 const fileClear    = document.getElementById('fileClear');
 const progressWrap = document.getElementById('progressWrap');
 const progressFill = document.getElementById('progressFill');
@@ -687,20 +653,21 @@ const btnSpin      = document.getElementById('btnSpin');
 const codeOutput   = document.getElementById('codeOutput');
 const codeBlock    = document.getElementById('codeBlock');
 const copyBtn      = document.getElementById('copyBtn');
+const infoBox      = document.getElementById('infoBox');
 const historyCard  = document.getElementById('historyCard');
 const historyList  = document.getElementById('historyList');
 const toast        = document.getElementById('toast');
 
-// ── Helpers ───────────────────────────────────────────────
 function fmtSize(b) {
   if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
   return (b / 1048576).toFixed(2) + ' MB';
 }
 
 function fmtDuration(sec) {
+  if (!sec || !isFinite(sec)) return '';
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
-  return m + ':' + String(s).padStart(2, '0');
+  return ' · ' + m + ':' + String(s).padStart(2, '0');
 }
 
 function escapeStr(s) {
@@ -717,75 +684,57 @@ function showToast(msg) {
 // ── File Handling ─────────────────────────────────────────
 function handleFile(file) {
   if (!file) return;
-
-  if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(mp3|wav|ogg|flac|m4a|aac)$/i)) {
+  if (!file.name.match(ALLOWED_EXTENSIONS)) {
     showToast('Unsupported format. Use MP3, WAV, OGG, or FLAC.');
     return;
   }
-
   if (file.size > MAX_FILE_SIZE) {
-    showToast('File too large. Maximum: 25 MB');
+    showToast('File too large. Maximum: 10 MB');
     return;
   }
 
   chosenFile = file;
+  fileDataUrl = null;
 
-  // Show file info
-  fileName.textContent = file.name;
-  fileMeta.textContent = fmtSize(file.size);
+  fileNameEl.textContent = file.name;
+  fileMetaEl.textContent = fmtSize(file.size);
   fileInfo.style.display = 'flex';
   generateBtn.disabled = false;
   codeOutput.style.display = 'none';
+  infoBox.style.display = 'none';
 
-  // Preview audio
   const url = URL.createObjectURL(file);
   audioPlayer.src = url;
   audioPreview.style.display = 'block';
 
-  // Get duration when loaded
   audioPlayer.addEventListener('loadedmetadata', function() {
-    if (audioPlayer.duration && isFinite(audioPlayer.duration)) {
-      fileMeta.textContent = fmtSize(file.size) + ' · ' + fmtDuration(audioPlayer.duration);
-    }
+    fileMetaEl.textContent = fmtSize(file.size) + fmtDuration(audioPlayer.duration);
   }, { once: true });
 }
 
 function clearFile() {
   chosenFile = null;
-  fileBase64 = null;
+  fileDataUrl = null;
   fileInput.value = '';
   fileInfo.style.display = 'none';
   progressWrap.style.display = 'none';
   audioPlayer.src = '';
   audioPreview.style.display = 'none';
   codeOutput.style.display = 'none';
+  infoBox.style.display = 'none';
   generateBtn.disabled = true;
 }
 
-// ── Drop Zone Events ──────────────────────────────────────
+// ── Drop Zone ─────────────────────────────────────────────
 dropZone.addEventListener('click', () => fileInput.click());
-
-dropZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropZone.classList.add('drag-over');
-});
-
-dropZone.addEventListener('dragleave', () => {
-  dropZone.classList.remove('drag-over');
-});
-
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
 });
-
-fileInput.addEventListener('change', () => {
-  const file = fileInput.files[0];
-  if (file) handleFile(file);
-});
-
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
 fileClear.addEventListener('click', clearFile);
 
 // ── Method Tabs ───────────────────────────────────────────
@@ -797,8 +746,8 @@ document.getElementById('methodTabs').addEventListener('click', e => {
   }
 });
 
-// ── Read File as Base64 ───────────────────────────────────
-function readFileAsBase64(file) {
+// ── Read as Data URL ──────────────────────────────────────
+function readAsDataURL(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
@@ -815,215 +764,182 @@ generateBtn.addEventListener('click', async () => {
   btnLabel.textContent = 'Reading file...';
   btnSpin.style.display = 'block';
   progressWrap.style.display = 'block';
-  progressFill.style.width = '15%';
-  progressPct.textContent = '15%';
-  progressStage.textContent = 'Reading file...';
+  progressFill.style.width = '20%';
+  progressPct.textContent = '20%';
+  progressStage.textContent = 'Reading audio data...';
   codeOutput.style.display = 'none';
+  infoBox.style.display = 'none';
 
   try {
-    // Read as data URL
-    const dataUrl = await readFileAsBase64(chosenFile);
+    const dataUrl = await readAsDataURL(chosenFile);
+    fileDataUrl = dataUrl;
 
-    progressFill.style.width = '50%';
-    progressPct.textContent = '50%';
-    progressStage.textContent = 'Encoding...';
-
-    // Extract base64 and mime type
-    const base64 = dataUrl.split(',')[1];
-    const mimeType = dataUrl.match(/data:([^;]+)/)[1];
-
-    progressFill.style.width = '85%';
-    progressPct.textContent = '85%';
+    progressFill.style.width = '60%';
+    progressPct.textContent = '60%';
     progressStage.textContent = 'Generating script...';
 
-    fileBase64 = base64;
     const safeName = escapeStr(chosenFile.name.replace(/\.\w+$/, ''));
-    const dataUri = 'data:' + mimeType + ';base64,' + base64;
+    const escapedUrl = dataUrl; // data: URIs don't need escaping in SoundId
 
     let code = '';
+
     switch (currentMethod) {
-      case 'sound':
-        code = `-- Audio: ${safeName}
--- Generated by TLMenu Audio Loader
+      case 'simple':
+        code = `-- 🎵 ${safeName} — Simple Player
+-- Copy this entire script into your Roblox executor
 
 local Sound = Instance.new("Sound")
-Sound.SoundId = "${dataUri}"
+Sound.SoundId = "${escapedUrl}"
 Sound.Volume = 1
-Sound.Parent = game:GetService("Workspace")
+Sound.Parent = workspace
 Sound:Play()
 
+-- Optional: Auto-destroy after playback
 Sound.Ended:Connect(function()
     Sound:Destroy()
-end)
-
---[[
-Controls:
-  Sound:Pause()
-  Sound:Resume()
-  Sound:Stop()
-  Sound.Volume = 0.5
-  Sound.Looped = true
-]]`;
-        break;
-
-      case 'loadstring':
-        code = `-- Audio Loadstring: ${safeName}
--- Generated by TLMenu Audio Loader
-
-local audioData = "${dataUri}"
-
-local Sound = Instance.new("Sound")
-Sound.SoundId = audioData
-Sound.Volume = 0.5
-Sound.Looped = false
-Sound.Parent = game:GetService("Workspace")
-
-Sound.Loaded:Connect(function()
-    print("[TLMenu] Playing: ${safeName}")
-    Sound:Play()
-end)
-
-Sound.Ended:Connect(function()
-    if not Sound.Looped then
-        Sound:Destroy()
-    end
 end)`;
         break;
 
-      case 'custom':
-        code = `-- Custom Audio Script: ${safeName}
--- Generated by TLMenu Audio Loader
+      case 'advanced':
+        code = `-- 🎵 ${safeName} — Advanced Audio Player
+-- Features: volume control, loop toggle, pause/resume, status display
 
--- ── Configuration ──────────────────────
-local CONFIG = {
-    Url = "${dataUri}",
-    Volume = 0.5,
-    Looped = false,
-    Parent = game:GetService("Workspace"),
-    AutoPlay = true,
-    DestroyOnEnd = true,
-}
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- ── Create Sound ────────────────────────
+-- Create sound
 local Sound = Instance.new("Sound")
-Sound.SoundId = CONFIG.Url
-Sound.Volume = CONFIG.Volume
-Sound.Looped = CONFIG.Looped
-Sound.Parent = CONFIG.Parent
+Sound.Name = "${safeName}"
+Sound.SoundId = "${escapedUrl}"
+Sound.Volume = 0.5
+Sound.Looped = false
+Sound.Parent = PlayerGui
 
--- ── Events ──────────────────────────────
+-- Wait for sound to load then play
 Sound.Loaded:Connect(function()
-    if CONFIG.AutoPlay then
-        Sound:Play()
-    end
+    print("✅ Loaded: ${safeName}")
+    print("   Duration: " .. math.floor(Sound.TimeLength) .. "s")
+    Sound:Play()
 end)
 
 Sound.Ended:Connect(function()
-    if CONFIG.DestroyOnEnd and not CONFIG.Looped then
+    print("⏹ Finished: ${safeName}")
+    if not Sound.Looped then
         Sound:Destroy()
     end
 end)
 
--- ── Public API ──────────────────────────
-local Audio = {}
+-- ── Controls (type these in console) ─────────────────────
+-- Sound:Pause()      — Pause
+-- Sound:Resume()     — Resume
+-- Sound:Stop()       — Stop
+-- Sound.Volume = 0.5 — Set volume (0-1)
+-- Sound.Looped = true — Toggle loop
+-- Sound.TimePosition = 10 — Seek to 10 seconds
+-- Sound:Destroy()    — Remove completely`;
+        break;
 
-function Audio:Play()
-    Sound:Play()
+      case 'loadstring':
+        code = `-- 🎵 ${safeName} — Loadstring Version
+-- This is a self-contained loadstring you can share with others.
+
+local audioData = [=[${escapedUrl}]=]
+
+local function PlayAudio()
+    local Sound = Instance.new("Sound")
+    Sound.SoundId = audioData
+    Sound.Volume = 1
+    Sound.Parent = game:GetService("Workspace")
+
+    Sound.Loaded:Connect(function()
+        Sound:Play()
+        print("🎵 Playing: ${safeName}")
+    end)
+
+    Sound.Ended:Connect(function()
+        Sound:Destroy()
+    end)
 end
 
-function Audio:Pause()
-    Sound:Pause()
-end
-
-function Audio:Stop()
-    Sound:Stop()
-end
-
-function Audio:SetVolume(vol)
-    Sound.Volume = math.clamp(vol, 0, 1)
-end
-
-function Audio:Destroy()
-    Sound:Destroy()
-end
-
-return Audio`;
+PlayAudio()`;
         break;
     }
 
     progressFill.style.width = '100%';
     progressPct.textContent = '100%';
-    progressStage.textContent = 'Done!';
+    progressStage.textContent = 'Done ✓';
 
     setTimeout(() => {
       progressWrap.style.display = 'none';
       codeBlock.innerHTML = highlightLua(code);
       codeOutput.style.display = 'block';
+      infoBox.style.display = 'block';
       btnLabel.textContent = 'Generate Script';
       btnSpin.style.display = 'none';
       generateBtn.disabled = false;
 
       saveToHistory(chosenFile.name, chosenFile.size);
       renderHistory();
-    }, 300);
+    }, 350);
 
   } catch (err) {
     progressWrap.style.display = 'none';
     btnLabel.textContent = 'Generate Script';
     btnSpin.style.display = 'none';
     generateBtn.disabled = false;
-    showToast('Error reading file: ' + err.message);
+    showToast('Error: ' + err.message);
   }
 });
 
-// ── Syntax Highlight ──────────────────────────────────────
+// ── Highlight ─────────────────────────────────────────────
 function highlightLua(code) {
   return code
     .replace(/--.*$/gm, m => `<span class="comment">${m}</span>`)
     .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="str">$1</span>')
     .replace(/('(?:[^'\\]|\\.)*')/g, '<span class="str">$1</span>')
+    .replace(/\[=\[.*?\]=]/gs, m => `<span class="str">${m.slice(0,60)}...</span>`)
     .replace(/\b(local|function|end|if|then|else|elseif|for|while|do|return|break|nil|true|false|and|or|not)\b/g, '<span class="kw">$1</span>')
-    .replace(/\b(game|workspace|Instance|Sound|Vector3|CFrame|UDim2|Color3|Enum|math|string|table|print|wait|task|pcall|tostring|tonumber)\b/g, '<span class="fn">$1</span>');
+    .replace(/\b(game|workspace|Instance|Sound|Vector3|CFrame|UDim2|Color3|Enum|math|string|table|print|wait|task|pcall|tostring|tonumber|Players|LocalPlayer|PlayerGui)\b/g, '<span class="fn">$1</span>');
 }
 
 // ── Copy ──────────────────────────────────────────────────
 copyBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(codeBlock.textContent).then(() => showToast('Copied to clipboard ✓'));
+  navigator.clipboard.writeText(codeBlock.textContent).then(() => showToast('Copied ✓ — Paste into your executor'));
 });
 
 // ── History ───────────────────────────────────────────────
 function getHistory() {
-  try { return JSON.parse(localStorage.getItem('tlmenu_audio_files') || '[]'); }
+  try { return JSON.parse(localStorage.getItem('tlmenu_audio_history_v2') || '[]'); }
   catch { return []; }
 }
 
 function saveToHistory(name, size) {
   const h = getHistory();
   h.unshift({ name, size, ts: Date.now() });
-  localStorage.setItem('tlmenu_audio_files', JSON.stringify(h.slice(0, 20)));
+  localStorage.setItem('tlmenu_audio_history_v2', JSON.stringify(h.slice(0, 15)));
 }
 
 function renderHistory() {
   const h = getHistory();
   if (!h.length) { historyCard.style.display = 'none'; return; }
   historyCard.style.display = 'block';
-
   historyList.innerHTML = h.map((item, i) => `
     <div class="history-item">
       <span class="history-item-icon">🎵</span>
       <span class="history-item-name">${item.name}</span>
       <span class="history-item-size">${fmtSize(item.size)}</span>
       <div class="history-item-actions">
-        <button class="history-btn" onclick="removeHistoryItem(${i})" style="color:#c06060;">✕</button>
+        <button class="history-btn" onclick="removeHistory(${i})" style="color:#c06060;">✕</button>
       </div>
     </div>
   `).join('');
 }
 
-function removeHistoryItem(index) {
+function removeHistory(index) {
   const h = getHistory();
   h.splice(index, 1);
-  localStorage.setItem('tlmenu_audio_files', JSON.stringify(h));
+  localStorage.setItem('tlmenu_audio_history_v2', JSON.stringify(h));
   renderHistory();
 }
 
