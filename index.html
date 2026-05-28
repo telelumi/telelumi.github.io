@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLMenu — Nametag Manager</title>
-<meta name="description" content="View and customize your Roblox nametags with TLMenu's built-in design tool.">
+<title>TLMenu — Audio Loader</title>
+<meta name="description" content="Convert MP3 URLs to Roblox-compatible loadstring audio snippets.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@350;420;500;600;700&family=JetBrains+Mono:wght@420;520;620&display=swap" rel="stylesheet">
 <style>
@@ -20,8 +20,8 @@
   --text: #d4d4de;
   --text2: #85859a;
   --text3: #54546a;
-  --accent: #8888a0;
-  --accent2: #a0a0b8;
+  --accent: #6a8a7a;
+  --accent2: #7a9e8a;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
   --radius: 8px;
@@ -39,6 +39,8 @@ body {
   line-height: 1.55;
   letter-spacing: -0.01em;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Navigation ─────────────────────────────────────────── */
@@ -65,11 +67,7 @@ nav {
   color: var(--text);
 }
 
-.nav-brand-dot {
-  width: 7px; height: 7px;
-  background: var(--text2);
-  border-radius: 2px;
-}
+.nav-brand-dot { width: 7px; height: 7px; background: var(--text2); border-radius: 2px; }
 
 .nav-brand-text {
   font-family: var(--mono);
@@ -78,12 +76,7 @@ nav {
   letter-spacing: 0.04em;
 }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  list-style: none;
-}
+.nav-links { display: flex; align-items: center; gap: 24px; list-style: none; }
 
 .nav-links a {
   font-size: 12.5px;
@@ -95,315 +88,68 @@ nav {
 
 .nav-links a:hover, .nav-links a.active { color: var(--text); }
 
-/* ── Layout ─────────────────────────────────────────────── */
-.app-layout {
+/* ── Main ───────────────────────────────────────────────── */
+.main {
+  flex: 1;
   display: flex;
-  min-height: calc(100vh - 56px);
+  justify-content: center;
+  padding: 48px 24px;
 }
 
-/* ── Sidebar ────────────────────────────────────────────── */
-.sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 20px 16px;
+.wrapper {
+  width: 100%;
+  max-width: 680px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 1px;
 }
 
-.sidebar-section {
-  font-family: var(--mono);
-  font-size: 9.5px;
-  color: var(--text3);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 12px 8px 4px;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition);
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 450;
-  border: 1px solid transparent;
-}
-
-.sidebar-item:hover {
-  background: var(--surface2);
-  color: var(--text);
-}
-
-.sidebar-item.active {
-  background: var(--surface2);
-  border-color: var(--border2);
-  color: var(--text);
-}
-
-.sidebar-item-icon {
-  width: 20px; height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  opacity: 0.5;
-}
-
-.sidebar-item.active .sidebar-item-icon { opacity: 0.8; }
-
-.sidebar-item-icon svg {
-  width: 15px; height: 15px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ── Main Content ───────────────────────────────────────── */
-.main-content {
-  flex: 1;
+/* ── Card ───────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 28px 32px;
-  overflow-y: auto;
-  max-height: calc(100vh - 56px);
 }
 
-.content-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
+.card:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.card:last-child { border-radius: 0 0 var(--radius) var(--radius); }
+.card:only-child { border-radius: var(--radius); }
+.card + .card { border-top: none; }
 
-.content-title {
-  font-size: 20px;
-  font-weight: 650;
-  letter-spacing: -0.025em;
-}
-
-.content-subtitle {
-  font-size: 12.5px;
-  color: var(--text2);
-  margin-top: 2px;
-}
-
-/* ── Nametag Card Grid ──────────────────────────────────── */
-.nametag-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-}
-
-.nametag-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  transition: border-color var(--transition);
-}
-
-.nametag-card:hover { border-color: var(--border2); }
-
-.nametag-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.nametag-avatar {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 620;
-  color: var(--text2);
-  flex-shrink: 0;
-}
-
-.nametag-info { flex: 1; min-width: 0; }
-
-.nametag-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nametag-role {
-  font-size: 11px;
-  color: var(--text2);
-  margin-top: 1px;
-}
-
-.nametag-badge {
-  font-family: var(--mono);
-  font-size: 9px;
-  padding: 3px 8px;
-  border-radius: 10px;
-  background: var(--surface2);
-  color: var(--text2);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.nametag-badge.admin { color: #c0a060; background: rgba(192, 160, 96, 0.08); }
-.nametag-badge.owner { color: #c08080; background: rgba(192, 128, 128, 0.08); }
-
-.nametag-preview {
-  width: 100%;
-  height: 60px;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
-  position: relative;
-  overflow: hidden;
-}
-
-.nametag-preview-tag {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 520;
-  padding: 6px 14px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #7a9e8a;
-  letter-spacing: 0.03em;
-}
-
-.nametag-preview-tag.admin { color: #c0a060; border-color: rgba(192, 160, 96, 0.25); }
-.nametag-preview-tag.owner { color: #c08080; border-color: rgba(192, 128, 128, 0.25); }
-
-.nametag-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.nametag-btn {
-  flex: 1;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 520;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: all var(--transition);
-  text-align: center;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text2);
-}
-
-.nametag-btn:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  color: var(--text);
-}
-
-.nametag-btn.primary {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
-}
-
-.nametag-btn.primary:hover { opacity: 0.85; }
-
-/* ── Editor Panel ───────────────────────────────────────── */
-.editor-panel {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  align-items: center;
-  justify-content: center;
-}
-
-.editor-panel.open { display: flex; }
-
-.editor-window {
-  width: 520px;
-  max-height: 85vh;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
-}
-
-.editor-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  background: var(--surface);
-  z-index: 2;
-}
-
-.editor-title {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-.editor-close {
-  width: 26px; height: 26px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text3);
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-
-.editor-close:hover {
-  border-color: rgba(255, 100, 100, 0.3);
-  color: #d47070;
-}
-
-.editor-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
-
-.editor-group { display: flex; flex-direction: column; gap: 6px; }
-
-.editor-label {
+.card-label {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text3);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  margin-bottom: 14px;
 }
 
-.editor-input, .editor-select {
+.card-title {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  margin-bottom: 4px;
+}
+
+.card-sub {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-bottom: 22px;
+}
+
+/* ── Input ──────────────────────────────────────────────── */
+.input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.input-field {
+  flex: 1;
   font-family: var(--mono);
   font-size: 12px;
-  padding: 9px 12px;
+  padding: 10px 14px;
   background: var(--bg);
   border: 1px solid var(--border2);
   border-radius: var(--radius-sm);
@@ -412,85 +158,221 @@ nav {
   transition: border-color var(--transition);
 }
 
-.editor-input:focus, .editor-select:focus { border-color: rgba(255, 255, 255, 0.2); }
-.editor-select { cursor: pointer; }
+.input-field::placeholder { color: var(--text3); }
+.input-field:focus { border-color: rgba(255, 255, 255, 0.2); }
 
-.editor-colors {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.editor-color-swatch {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-
-.editor-color-swatch:hover { border-color: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
-.editor-color-swatch.selected { border-color: #fff; }
-
-.editor-preview-live {
-  width: 100%;
-  height: 80px;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.editor-preview-tag {
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 520;
-  padding: 8px 18px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  letter-spacing: 0.03em;
-  transition: all var(--transition);
-}
-
-.editor-actions {
-  display: flex;
-  gap: 10px;
-  padding-top: 6px;
-}
-
-.editor-btn {
-  flex: 1;
+.btn {
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 520;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-sm);
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all var(--transition);
+  white-space: nowrap;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.btn-primary:hover { opacity: 0.85; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+}
+
+.btn-ghost:hover { border-color: rgba(255, 255, 255, 0.15); color: var(--text); }
+
+/* ── Audio Player ───────────────────────────────────────── */
+.audio-preview {
+  display: none;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.audio-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.audio-preview-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.audio-preview-close {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  transition: color var(--transition);
+}
+
+.audio-preview-close:hover { color: #c06060; }
+
+.audio-player {
+  width: 100%;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.audio-player::-webkit-media-controls-panel {
+  background: var(--surface3);
+}
+
+.audio-player::-webkit-media-controls-current-time-display,
+.audio-player::-webkit-media-controls-time-remaining-display {
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+/* ── Code Output ────────────────────────────────────────── */
+.code-output {
+  display: none;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.code-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: var(--text2);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.code-block .kw { color: var(--accent2); font-weight: 520; }
+.code-block .str { color: #7a9e8a; }
+.code-block .fn { color: #c0a060; }
+.code-block .comment { color: var(--text3); }
+
+/* ── Method Selector ────────────────────────────────────── */
+.method-tabs {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 16px;
+  background: var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.method-tab {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 520;
+  padding: 9px 12px;
+  background: var(--surface2);
+  color: var(--text3);
+  border: none;
   cursor: pointer;
   letter-spacing: 0.03em;
   transition: all var(--transition);
   text-align: center;
 }
 
-.editor-btn.save {
-  background: var(--text);
-  color: var(--bg);
-  border: none;
+.method-tab.active {
+  background: var(--surface3);
+  color: var(--text);
 }
 
-.editor-btn.save:hover { opacity: 0.85; }
+.method-tab:hover:not(.active) { color: var(--text2); }
 
-.editor-btn.cancel {
+/* ── History ────────────────────────────────────────────── */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.history-item-icon {
+  opacity: 0.4;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.history-item-url {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.history-btn {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  padding: 4px 10px;
+  border-radius: 4px;
   background: transparent;
   border: 1px solid var(--border2);
-  color: var(--text2);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
 }
 
-.editor-btn.cancel:hover { border-color: rgba(255, 255, 255, 0.15); color: var(--text); }
+.history-btn:hover { border-color: rgba(255, 255, 255, 0.15); color: var(--text); }
 
 /* ── Toast ──────────────────────────────────────────────── */
 .toast {
@@ -513,43 +395,22 @@ nav {
 
 .toast.show { opacity: 1; transform: translateY(0); }
 
-/* ── Empty state ────────────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 48px 24px;
-  color: var(--text3);
+/* ── Footer ─────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.empty-state-icon {
-  font-size: 36px;
-  margin-bottom: 14px;
-  opacity: 0.4;
-}
-
-.empty-state-text {
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-/* ── Responsive ──────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .sidebar { width: 200px; }
-  .nametag-grid { grid-template-columns: 1fr; }
-  .editor-window { width: 90vw; }
-}
+.footer-text { font-size: 11px; color: var(--text3); }
+.footer-brand { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 0.04em; }
 
 @media (max-width: 600px) {
-  .app-layout { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 12px;
-    gap: 4px;
-  }
-  .sidebar-section { display: none; }
-  .sidebar-item { white-space: nowrap; font-size: 11px; padding: 8px 10px; }
-  .main-content { padding: 20px 16px; }
+  .card { padding: 20px 16px; }
+  .input-group { flex-direction: column; }
+  .method-tabs { flex-wrap: wrap; }
 }
 </style>
 </head>
@@ -562,359 +423,296 @@ nav {
   </a>
   <ul class="nav-links">
     <li><a href="../">Home</a></li>
-    <li><a href="../#features">Features</a></li>
     <li><a href="upload.html">Uploader</a></li>
-    <li><a href="nametags.html" class="active">Nametags</a></li>
+    <li><a href="nametags.html">Nametags</a></li>
+    <li><a href="audio.html" class="active">Audio</a></li>
   </ul>
 </nav>
 
-<div class="app-layout">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-section">Navigation</div>
-    <div class="sidebar-item active" data-view="all">
-      <span class="sidebar-item-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
-      </span>
-      All Nametags
-    </div>
-    <div class="sidebar-item" data-view="admins">
-      <span class="sidebar-item-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </span>
-      Admins
-    </div>
-    <div class="sidebar-item" data-view="owner">
-      <span class="sidebar-item-icon">
-        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      </span>
-      Owner
-    </div>
-    <div class="sidebar-item" data-view="devs">
-      <span class="sidebar-item-icon">
-        <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      </span>
-      Developers
-    </div>
-    <div class="sidebar-item" data-view="mods">
-      <span class="sidebar-item-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      </span>
-      Moderators
-    </div>
-    <div style="margin-top:auto;">
-      <div class="sidebar-item" id="addNewBtn">
-        <span class="sidebar-item-icon">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </span>
-        Add New
-      </div>
-    </div>
-  </aside>
+<div class="main">
+  <div class="wrapper">
 
-  <!-- Main Content -->
-  <main class="main-content" id="mainContent">
-    <div class="content-header">
-      <div>
-        <div class="content-title">Nametag Manager</div>
-        <div class="content-subtitle">View and customize all registered nametags</div>
-      </div>
-    </div>
-    <div class="nametag-grid" id="nametagGrid"></div>
-  </main>
-</div>
+    <!-- Input Card -->
+    <div class="card">
+      <div class="card-label">Audio Loader</div>
+      <div class="card-title">MP3 to Script</div>
+      <div class="card-sub">Paste an MP3 URL and get a ready-to-use Roblox loadstring.</div>
 
-<!-- Editor Modal -->
-<div class="editor-panel" id="editorPanel">
-  <div class="editor-window">
-    <div class="editor-header">
-      <span class="editor-title">Edit Nametag</span>
-      <button class="editor-close" id="editorClose">✕</button>
-    </div>
-    <div class="editor-body">
-      <div class="editor-group">
-        <span class="editor-label">Username / ID</span>
-        <input type="text" class="editor-input" id="editUser" placeholder="Username or UserID" readonly />
+      <div class="method-tabs" id="methodTabs">
+        <button class="method-tab active" data-method="sound">Sound Object</button>
+        <button class="method-tab" data-method="loadstring">Loadstring</button>
+        <button class="method-tab" data-method="custom">Custom Script</button>
       </div>
-      <div class="editor-group">
-        <span class="editor-label">Display Name</span>
-        <input type="text" class="editor-input" id="editDisplay" placeholder="Display name on nametag" />
+
+      <div class="input-group">
+        <input type="text" class="input-field" id="urlInput" placeholder="https://example.com/audio.mp3" autocomplete="off" spellcheck="false" />
+        <button class="btn btn-primary" id="generateBtn">Generate</button>
       </div>
-      <div class="editor-group">
-        <span class="editor-label">Role</span>
-        <select class="editor-select" id="editRole">
-          <option value="Owner">Owner</option>
-          <option value="Administrator">Administrator</option>
-          <option value="Developer">Developer</option>
-          <option value="Moderator">Moderator</option>
-          <option value="TL USER">TL USER</option>
-        </select>
-      </div>
-      <div class="editor-group">
-        <span class="editor-label">Name Color</span>
-        <div class="editor-colors" id="nameColors">
-          <span class="editor-color-swatch" data-color="#d4d4de" style="background:#d4d4de"></span>
-          <span class="editor-color-swatch" data-color="#c0a060" style="background:#c0a060"></span>
-          <span class="editor-color-swatch" data-color="#7a9e8a" style="background:#7a9e8a"></span>
-          <span class="editor-color-swatch" data-color="#8ab4d8" style="background:#8ab4d8"></span>
-          <span class="editor-color-swatch" data-color="#c08080" style="background:#c08080"></span>
-          <span class="editor-color-swatch" data-color="#b8a0d0" style="background:#b8a0d0"></span>
+
+      <!-- Audio Preview -->
+      <div class="audio-preview" id="audioPreview">
+        <div class="audio-preview-header">
+          <span class="audio-preview-title" id="audioTitle">Audio Preview</span>
+          <button class="audio-preview-close" id="audioClose">✕</button>
         </div>
+        <audio class="audio-player" id="audioPlayer" controls preload="metadata">
+          Your browser does not support the audio element.
+        </audio>
       </div>
-      <div class="editor-group">
-        <span class="editor-label">Live Preview</span>
-        <div class="editor-preview-live">
-          <div class="editor-preview-tag" id="editorPreviewTag">Preview Nametag</div>
+
+      <!-- Code Output -->
+      <div class="code-output" id="codeOutput">
+        <div class="code-header">
+          <span class="code-label">Generated Script</span>
+          <button class="btn btn-ghost" id="copyBtn">Copy</button>
         </div>
-      </div>
-      <div class="editor-actions">
-        <button class="editor-btn cancel" id="editorCancel">Cancel</button>
-        <button class="editor-btn save" id="editorSave">Save Changes</button>
+        <div class="code-block" id="codeBlock"></div>
       </div>
     </div>
+
+    <!-- History Card -->
+    <div class="card" id="historyCard" style="display:none;">
+      <div class="card-label">Recent</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- Toast -->
+<footer>
+  <span class="footer-text">TLMenu Audio Loader</span>
+  <span class="footer-brand">TLMenu</span>
+</footer>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Nametag Data ──────────────────────────────────────────
-const ROLES_URL = 'https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NametagRoles.json';
+// ── State ─────────────────────────────────────────────────
+let currentMethod = 'sound';
+let currentUrl = '';
 
-let nametags = [];
-let currentFilter = 'all';
-let editingIndex = -1;
-let selectedNameColor = '#d4d4de';
+// ── DOM Refs ──────────────────────────────────────────────
+const methodTabs    = document.getElementById('methodTabs');
+const urlInput      = document.getElementById('urlInput');
+const generateBtn   = document.getElementById('generateBtn');
+const audioPreview  = document.getElementById('audioPreview');
+const audioTitle    = document.getElementById('audioTitle');
+const audioPlayer   = document.getElementById('audioPlayer');
+const audioClose    = document.getElementById('audioClose');
+const codeOutput    = document.getElementById('codeOutput');
+const codeBlock     = document.getElementById('codeBlock');
+const copyBtn       = document.getElementById('copyBtn');
+const historyCard   = document.getElementById('historyCard');
+const historyList   = document.getElementById('historyList');
+const toast         = document.getElementById('toast');
 
-// ── Fetch nametags ────────────────────────────────────────
-async function loadNametags() {
+// ── Methods ───────────────────────────────────────────────
+methodTabs.addEventListener('click', e => {
+  if (e.target.classList.contains('method-tab')) {
+    document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    currentMethod = e.target.dataset.method;
+    if (currentUrl) generateCode(currentUrl);
+  }
+});
+
+// ── Generate ──────────────────────────────────────────────
+function isValidAudioUrl(url) {
+  return /^https?:\/\/.+\.(mp3|wav|ogg|flac|m4a|aac|wma|opus)(\?.*)?$/i.test(url) ||
+         /^rbxassetid:\/\/\d+$/i.test(url);
+}
+
+function extractFileName(url) {
   try {
-    const resp = await fetch(ROLES_URL);
-    if (!resp.ok) throw new Error('Failed to fetch');
-    const text = await resp.text();
-    parseNametags(text);
-  } catch (e) {
-    console.warn('Could not load from GitHub, using localStorage fallback');
-    loadFromLocalStorage();
+    const path = new URL(url).pathname;
+    const name = path.split('/').pop() || 'audio';
+    return decodeURIComponent(name).replace(/\.\w+$/, '');
+  } catch {
+    const match = url.match(/([^/]+)\.\w+(\?|$)/);
+    return match ? match[1] : 'audio';
   }
 }
 
-function parseNametags(text) {
-  nametags = [];
-  const lines = text.split('\n');
-  for (const line of lines) {
-    const match = line.match(/\["([^"]+)"\]\s*=\s*\{\s*display\s*=\s*"([^"]+)"\s*,\s*role\s*=\s*"([^"]+)"\s*\}/);
-    if (match) {
-      nametags.push({
-        id: match[1],
-        display: match[2],
-        role: match[3],
-        color: getDefaultColor(match[3])
-      });
+function escapeString(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+
+function generateCode(url) {
+  currentUrl = url;
+  const fileName = extractFileName(url);
+  const escapedUrl = escapeString(url);
+
+  let code = '';
+
+  switch (currentMethod) {
+    case 'sound':
+      code = `-- Play audio: ${fileName}
+local Sound = Instance.new("Sound")
+Sound.SoundId = "${escapedUrl}"
+Sound.Volume = 1
+Sound.Parent = game:GetService("Workspace") -- or game.Players.LocalPlayer.PlayerGui
+Sound:Play()
+
+-- Optional: Destroy after playback
+Sound.Ended:Connect(function()
+    Sound:Destroy()
+end)`;
+      break;
+
+    case 'loadstring':
+      code = `-- Audio Loadstring for ${fileName}
+-- Paste this into your executor:
+
+loadstring(game:HttpGet("${escapedUrl}"))();
+
+-- Or for direct sound loading:
+local s = Instance.new("Sound", workspace)
+s.SoundId = "${escapedUrl}"
+s.Volume = 0.5
+s.Looped = true
+s:Play()`;
+      break;
+
+    case 'custom':
+      code = `-- Custom Audio Script: ${fileName}
+-- Configure below:
+
+local AUDIO_URL = "${escapedUrl}"
+local VOLUME = 0.5
+local LOOPED = false
+local PARENT = game:GetService("Workspace")
+
+-- Create and play
+local Sound = Instance.new("Sound")
+Sound.SoundId = AUDIO_URL
+Sound.Volume = VOLUME
+Sound.Looped = LOOPED
+Sound.Parent = PARENT
+
+Sound.Loaded:Connect(function()
+    print("[TLMenu] Loaded: ${fileName}")
+    Sound:Play()
+end)
+
+Sound.Ended:Connect(function()
+    if not LOOPED then
+        print("[TLMenu] Finished: ${fileName}")
+        Sound:Destroy()
+    end
+end)
+
+-- Controls (uncomment to use):
+-- Sound:Pause()
+-- Sound:Resume()
+-- Sound:Stop()
+-- Sound:Destroy()`;
+      break;
+  }
+
+  codeBlock.innerHTML = syntaxHighlight(code);
+  codeOutput.style.display = 'block';
+  updateAudioPreview(url, fileName);
+  saveToHistory(url, fileName);
+  renderHistory();
+}
+
+function syntaxHighlight(code) {
+  return code
+    .replace(/--.*$/gm, match => `<span class="comment">${match}</span>`)
+    .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="str">$1</span>')
+    .replace(/('(?:[^'\\]|\\.)*')/g, '<span class="str">$1</span>')
+    .replace(/\b(local|function|end|if|then|else|elseif|for|while|do|return|break|nil|true|false|and|or|not)\b/g, '<span class="kw">$1</span>')
+    .replace(/\b(game|workspace|Instance|Sound|Vector3|CFrame|UDim2|Color3|Enum|math|string|table|print|wait|task|pcall|tostring|tonumber)\b/g, '<span class="fn">$1</span>');
+}
+
+// ── Audio Preview ─────────────────────────────────────────
+function updateAudioPreview(url, name) {
+  audioTitle.textContent = name;
+  audioPlayer.src = url;
+  audioPreview.style.display = 'block';
+}
+
+audioClose.addEventListener('click', () => {
+  audioPlayer.pause();
+  audioPlayer.src = '';
+  audioPreview.style.display = 'none';
+});
+
+// ── Copy ──────────────────────────────────────────────────
+copyBtn.addEventListener('click', () => {
+  const rawCode = codeBlock.textContent;
+  navigator.clipboard.writeText(rawCode).then(() => showToast('Copied to clipboard ✓'));
+});
+
+// ── Generate Button ───────────────────────────────────────
+generateBtn.addEventListener('click', () => {
+  const url = urlInput.value.trim();
+  if (!url) { showToast('Please enter a URL'); return; }
+  if (!isValidAudioUrl(url)) {
+    // Try anyway — might be a direct link without extension
+    if (url.startsWith('http')) {
+      generateCode(url);
+      return;
     }
-  }
-  if (nametags.length === 0) loadFromLocalStorage();
-  else {
-    saveToLocalStorage();
-    renderNametags();
-  }
-}
-
-function getDefaultColor(role) {
-  const r = role.toLowerCase();
-  if (r.includes('owner')) return '#c08080';
-  if (r.includes('admin')) return '#c0a060';
-  if (r.includes('dev')) return '#8ab4d8';
-  if (r.includes('mod')) return '#7a9e8a';
-  return '#d4d4de';
-}
-
-function loadFromLocalStorage() {
-  const stored = localStorage.getItem('tlmenu_nametags');
-  if (stored) {
-    try { nametags = JSON.parse(stored); } catch { nametags = getDefaultNametags(); }
-  } else {
-    nametags = getDefaultNametags();
-  }
-  if (nametags.length === 0) nametags = getDefaultNametags();
-  saveToLocalStorage();
-  renderNametags();
-}
-
-function saveToLocalStorage() {
-  localStorage.setItem('tlmenu_nametags', JSON.stringify(nametags));
-}
-
-function getDefaultNametags() {
-  return [
-    { id: '3242332433', display: 'TL Owner', role: 'Administrator', color: '#c08080' },
-    { id: 'you2iubdfisub', display: 'TL Admin', role: 'Administrator', color: '#c0a060' },
-    { id: 'DevMaster', display: 'TL Developer', role: 'Developer', color: '#8ab4d8' },
-    { id: 'ModHelper', display: 'TL Moderator', role: 'Moderator', color: '#7a9e8a' },
-  ];
-}
-
-// ── Render ────────────────────────────────────────────────
-function renderNametags() {
-  const grid = document.getElementById('nametagGrid');
-  let filtered = nametags;
-
-  if (currentFilter === 'admins') {
-    filtered = nametags.filter(n => n.role.toLowerCase().includes('admin'));
-  } else if (currentFilter === 'owner') {
-    filtered = nametags.filter(n => n.role.toLowerCase().includes('owner'));
-  } else if (currentFilter === 'devs') {
-    filtered = nametags.filter(n => n.role.toLowerCase().includes('dev'));
-  } else if (currentFilter === 'mods') {
-    filtered = nametags.filter(n => n.role.toLowerCase().includes('mod'));
-  }
-
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-      <div class="empty-state-icon">🏷️</div>
-      <div class="empty-state-text">No nametags found for this filter.<br>Click "Add New" to create one.</div>
-    </div>`;
+    showToast('Invalid URL format');
     return;
   }
+  generateCode(url);
+});
 
-  grid.innerHTML = filtered.map((n, i) => {
-    const originalIndex = nametags.indexOf(n);
-    const isAdmin = n.role.toLowerCase().includes('admin');
-    const isOwner = n.role.toLowerCase().includes('owner');
-    const badgeClass = isOwner ? 'owner' : (isAdmin ? 'admin' : '');
-    const previewClass = isOwner ? 'owner' : (isAdmin ? 'admin' : '');
+// Enter key
+urlInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') generateBtn.click();
+});
 
-    return `
-      <div class="nametag-card">
-        <div class="nametag-card-header">
-          <div class="nametag-avatar">${(n.display || n.id).charAt(0).toUpperCase()}</div>
-          <div class="nametag-info">
-            <div class="nametag-name">${n.display || n.id}</div>
-            <div class="nametag-role">@${n.id} · ${n.role}</div>
-          </div>
-          <span class="nametag-badge ${badgeClass}">${n.role}</span>
-        </div>
-        <div class="nametag-preview">
-          <div class="nametag-preview-tag ${previewClass}" style="color:${n.color || '#d4d4de'};border-color:${n.color || '#d4d4de'}33;">
-            ${n.display || n.id} · ${n.role}
-          </div>
-        </div>
-        <div class="nametag-actions">
-          <button class="nametag-btn" onclick="editNametag(${originalIndex})">Edit</button>
-          <button class="nametag-btn" onclick="copyNametagCode(${originalIndex})">Copy</button>
-          <button class="nametag-btn" onclick="deleteNametag(${originalIndex})" style="color:#c06060;">Delete</button>
-        </div>
+// ── History ───────────────────────────────────────────────
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('tlmenu_audio_history') || '[]'); }
+  catch { return []; }
+}
+
+function saveToHistory(url, name) {
+  const h = getHistory();
+  // Remove duplicates
+  const filtered = h.filter(item => item.url !== url);
+  filtered.unshift({ url, name, ts: Date.now() });
+  localStorage.setItem('tlmenu_audio_history', JSON.stringify(filtered.slice(0, 15)));
+}
+
+function renderHistory() {
+  const h = getHistory();
+  if (!h.length) { historyCard.style.display = 'none'; return; }
+  historyCard.style.display = 'block';
+
+  historyList.innerHTML = h.map((item, i) => `
+    <div class="history-item">
+      <span class="history-item-icon">🎵</span>
+      <span class="history-item-url" title="${item.url}">${item.name}</span>
+      <div class="history-item-actions">
+        <button class="history-btn" onclick="loadHistoryItem(${i})">Load</button>
+        <button class="history-btn" onclick="removeHistoryItem(${i})" style="color:#c06060;">✕</button>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
-// ── Editor ────────────────────────────────────────────────
-function editNametag(index) {
-  editingIndex = index;
-  const n = nametags[index];
-  document.getElementById('editUser').value = n.id;
-  document.getElementById('editDisplay').value = n.display;
-  document.getElementById('editRole').value = n.role;
-  selectedNameColor = n.color || '#d4d4de';
-  updateColorSwatches();
-  updateLivePreview();
-  document.getElementById('editorPanel').classList.add('open');
-}
-
-function updateColorSwatches() {
-  document.querySelectorAll('#nameColors .editor-color-swatch').forEach(s => {
-    s.classList.toggle('selected', s.dataset.color === selectedNameColor);
-  });
-}
-
-function updateLivePreview() {
-  const display = document.getElementById('editDisplay').value || 'Preview';
-  const role = document.getElementById('editRole').value;
-  const tag = document.getElementById('editorPreviewTag');
-  tag.textContent = display + ' · ' + role;
-  tag.style.color = selectedNameColor;
-  tag.style.borderColor = selectedNameColor + '33';
-}
-
-document.getElementById('editDisplay').addEventListener('input', updateLivePreview);
-document.getElementById('editRole').addEventListener('change', updateLivePreview);
-
-document.querySelectorAll('#nameColors .editor-color-swatch').forEach(s => {
-  s.addEventListener('click', () => {
-    selectedNameColor = s.dataset.color;
-    updateColorSwatches();
-    updateLivePreview();
-  });
-});
-
-document.getElementById('editorCancel').addEventListener('click', () => {
-  document.getElementById('editorPanel').classList.remove('open');
-  editingIndex = -1;
-});
-
-document.getElementById('editorClose').addEventListener('click', () => {
-  document.getElementById('editorPanel').classList.remove('open');
-  editingIndex = -1;
-});
-
-document.getElementById('editorSave').addEventListener('click', () => {
-  if (editingIndex < 0 || editingIndex >= nametags.length) return;
-  nametags[editingIndex].display = document.getElementById('editDisplay').value.trim() || nametags[editingIndex].display;
-  nametags[editingIndex].role = document.getElementById('editRole').value;
-  nametags[editingIndex].color = selectedNameColor;
-  saveToLocalStorage();
-  renderNametags();
-  document.getElementById('editorPanel').classList.remove('open');
-  editingIndex = -1;
-  showToast('Nametag updated ✓');
-});
-
-// ── Add New ───────────────────────────────────────────────
-document.getElementById('addNewBtn').addEventListener('click', () => {
-  nametags.push({
-    id: 'NewUser',
-    display: 'New User',
-    role: 'TL USER',
-    color: '#d4d4de'
-  });
-  saveToLocalStorage();
-  renderNametags();
-  editNametag(nametags.length - 1);
-  showToast('New nametag created ✓');
-});
-
-// ── Delete ────────────────────────────────────────────────
-function deleteNametag(index) {
-  if (confirm('Delete nametag for ' + nametags[index].display + '?')) {
-    nametags.splice(index, 1);
-    saveToLocalStorage();
-    renderNametags();
-    showToast('Nametag deleted');
+function loadHistoryItem(index) {
+  const h = getHistory();
+  if (h[index]) {
+    urlInput.value = h[index].url;
+    generateCode(h[index].url);
   }
 }
 
-// ── Copy Code ─────────────────────────────────────────────
-function copyNametagCode(index) {
-  const n = nametags[index];
-  const code = `["${n.id}"] = { display = "${n.display}", role = "${n.role}" },`;
-  navigator.clipboard.writeText(code).then(() => showToast('Code copied to clipboard ✓'));
+function removeHistoryItem(index) {
+  const h = getHistory();
+  h.splice(index, 1);
+  localStorage.setItem('tlmenu_audio_history', JSON.stringify(h));
+  renderHistory();
 }
-
-// ── Sidebar Navigation ────────────────────────────────────
-document.querySelectorAll('.sidebar-item[data-view]').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    currentFilter = item.dataset.view;
-    renderNametags();
-  });
-});
 
 // ── Toast ─────────────────────────────────────────────────
 function showToast(msg) {
-  const toast = document.getElementById('toast');
   toast.textContent = msg;
   toast.classList.add('show');
   clearTimeout(toast._timeout);
@@ -922,7 +720,7 @@ function showToast(msg) {
 }
 
 // ── Init ──────────────────────────────────────────────────
-loadNametags();
+renderHistory();
 </script>
 </body>
 </html>
