@@ -1,10 +1,15 @@
 -- OWNER
-["6373281"] = { display = "TL Owner", role = "Administrator" },
--- ADMINS
-["you2iubdfisub"] = { display = "TL Admin", role = "Administrator" },
+["spacewingman"] = { display = "TL Owner", role = "Administrator" },
 
--- DEVELOPER  
-["DevMaster"] = { display = "TL Developer", role = "Developer" },
+-- ADMINS
+["NiTrOx_Jamie0"] = { display = "TL Admin", role = "Administrator" },
+["Opacraker"] = { display = "TL Admin", role = "Administrator" },
+["111222333"] = { display = "TL Admin", role = "Administrator" },
+
+-- DEVELOPER
+["444555666"] = { display = "TL Developer", role = "Developer" },
+["777888999"] = { display = "TL Developer", role = "Developer" },
 
 -- MODERATOREN
-["ModHelper"] = { display = "TL Moderator", role = "Moderator" },
+["100200300"] = { display = "TL Moderator", role = "Moderator" },
+["400500600"] = { display = "TL Moderator", role = "Moderator" },
