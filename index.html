@@ -1,1 +1,1207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLMenu — Roblox GUI</title>
+<meta name="description" content="TLMenu — A powerful Roblox GUI menu system. Built for speed, designed for clarity.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+:root {
+  --c0: #07090f;
+  --c1: #0d1018;
+  --c2: #131720;
+  --c3: #1a1f2c;
+  --c4: #222838;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --txt: #dde8f0;
+  --txt2: #6a7f9a;
+  --txt3: #3a4a5e;
+  --acc: #00d4ff;
+  --acc2: #00b8e0;
+  --acc-dim: rgba(0,212,255,0.08);
+  --acc-glow: rgba(0,212,255,0.15);
+  --grad: linear-gradient(135deg, #4b6cf7, #00d4ff, #a8e63d);
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  background: var(--c0);
+  color: var(--txt);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10,10,8,0.85);
+  backdrop-filter: blur(20px);
+}
+
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--txt);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-logo-mark {
+  display: inline-block;
+  width: 20px; height: 20px;
+  background: linear-gradient(135deg, #4b6cf7, #00d4ff);
+  border-radius: 4px;
+}
+
+.nav-center {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
+
+.nav-center a {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--txt2);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 140ms;
+}
+
+.nav-center a:hover { color: var(--txt); }
+
+.nav-dl {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(135deg, #4b6cf7, #00d4ff);
+  border: none;
+  padding: 7px 18px;
+  border-radius: 4px;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: opacity 140ms;
+}
+.nav-dl:hover { opacity: 0.85; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 52px;
+  position: relative;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 48px 80px 60px;
+  border-right: 1px solid var(--border);
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  color: #00d4ff;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+.hero-tag::before {
+  content: '';
+  display: block;
+  width: 24px; height: 1px;
+  background: var(--acc);
+}
+
+h1 {
+  font-family: var(--font-head);
+  font-size: clamp(56px, 7vw, 92px);
+  font-weight: 800;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  color: var(--txt);
+  margin-bottom: 28px;
+}
+
+.h1-accent { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.hero-desc {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--txt2);
+  line-height: 1.75;
+  max-width: 400px;
+  margin-bottom: 44px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-main {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(135deg, #4b6cf7, #00d4ff);
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  transition: all 140ms;
+}
+.btn-main:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.btn-ghost {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--txt2);
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  letter-spacing: 0.05em;
+  transition: all 140ms;
+}
+.btn-ghost:hover { color: var(--txt); border-color: rgba(255,255,255,0.22); }
+
+/* Hero Right — GUI Demo */
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 40px;
+  position: relative;
+  background: var(--c1);
+}
+
+.hero-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,212,255,0.05), transparent 70%);
+  pointer-events: none;
+}
+
+/* Demo GUI */
+.demo-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  z-index: 2;
+}
+
+.demo-screen {
+  background: var(--c0);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+
+.demo-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--c1);
+}
+
+.dtb-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+}
+
+.dtb-dot:nth-child(1) { background: #3a3a38; }
+.dtb-dot:nth-child(2) { background: #3a3a38; }
+.dtb-dot:nth-child(3) { background: #3a3a38; }
+
+.dtb-title {
+  margin: 0 auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt3);
+  letter-spacing: 0.08em;
+}
+
+.demo-body {
+  padding: 0;
+  min-height: 240px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* TL Panel inside demo */
+#tl-panel {
+  width: 200px;
+  background: var(--c2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  margin: 24px;
+}
+
+.tlp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--c3);
+  cursor: grab;
+  user-select: none;
+}
+.tlp-header:active { cursor: grabbing; }
+
+.tlp-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt2);
+  letter-spacing: 0.06em;
+}
+
+.tlp-close {
+  width: 16px; height: 16px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  border-radius: 3px;
+  color: var(--txt3);
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 120ms;
+  line-height: 1;
+}
+.tlp-close:hover { background: rgba(220,80,80,0.15); border-color: rgba(220,80,80,0.4); color: #d07070; }
+
+.tlp-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.tlp-tab {
+  flex: 1;
+  padding: 5px 0;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  color: var(--txt3);
+  text-align: center;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: all 120ms;
+  border: none;
+  background: transparent;
+}
+
+.tlp-tab.active {
+  color: var(--acc);
+  border-bottom: 1px solid var(--acc);
+}
+
+.tlp-tab:hover:not(.active) { color: var(--txt2); }
+
+.tlp-content {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.tlp-welcome {
+  font-size: 9px;
+  color: var(--txt2);
+  text-align: center;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.tlp-btn {
+  width: 100%;
+  padding: 7px;
+  background: var(--acc);
+  color: var(--c0);
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 120ms;
+}
+.tlp-btn:hover { background: var(--acc2); transform: scale(0.98); }
+.tlp-btn:active { transform: scale(0.95); }
+
+.tlp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tlp-lbl {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--txt3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tlp-toggle {
+  width: 28px; height: 14px;
+  border-radius: 7px;
+  background: var(--c4);
+  border: 1px solid var(--border2);
+  position: relative;
+  cursor: pointer;
+  transition: all 150ms;
+  flex-shrink: 0;
+}
+.tlp-toggle.on { background: var(--acc); border-color: var(--acc); }
+.tlp-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--txt3);
+  transition: all 150ms var(--ease);
+}
+.tlp-toggle.on .tlp-thumb { left: 16px; background: var(--c0); }
+
+.tlp-ok {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--acc);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 120ms;
+  letter-spacing: 0.04em;
+}
+
+/* Demo icon pill (floating) */
+.demo-icon-pill {
+  position: absolute;
+  top: -14px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--c3);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 14px 6px 8px;
+  z-index: 3;
+  cursor: default;
+}
+
+.dip-icon {
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, #4b6cf7, #00d4ff);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.dip-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt2);
+  letter-spacing: 0.04em;
+}
+
+/* Code snippet below demo */
+.code-snip {
+  margin-top: 20px;
+  background: var(--c1);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-snip-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--c2);
+}
+
+.code-snip-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.code-snip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--c4);
+}
+
+.code-snip-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt3);
+  letter-spacing: 0.08em;
+}
+
+.code-snip-body {
+  padding: 18px 20px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 2;
+  color: var(--txt2);
+  position: relative;
+}
+
+.code-line {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.code-ln {
+  color: var(--txt3);
+  font-size: 10px;
+  user-select: none;
+  flex-shrink: 0;
+  width: 14px;
+  text-align: right;
+}
+
+.c-kw { color: var(--acc); }
+.c-fn { color: #7eb8f7; }
+.c-str { color: #5bc4d8; }
+.c-dim { color: var(--txt3); }
+.c-pun { color: var(--txt3); }
+
+/* Copy btn */
+.copy-btn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt3);
+  background: var(--c3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 12px;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: all 120ms;
+  flex-shrink: 0;
+}
+.copy-btn:hover {
+  color: var(--acc);
+  border-color: rgba(0,212,255,0.3);
+  background: rgba(0,212,255,0.06);
+}
+
+/* ── STATS BAR ── */
+.statsbar {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.sb-item {
+  padding: 28px 36px;
+  border-right: 1px solid var(--border);
+  transition: background 150ms;
+}
+.sb-item:last-child { border-right: none; }
+.sb-item:hover { background: rgba(255,255,255,0.012); }
+
+.sb-num {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--txt);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.sb-num span { color: var(--acc); }
+
+.sb-lbl {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--txt3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── SECTION ── */
+.section { padding: 96px 60px; }
+
+.sec-tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--acc);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-tag::before {
+  content: '';
+  display: block;
+  width: 18px; height: 1px;
+  background: var(--acc);
+}
+
+.sec-title {
+  font-family: var(--font-head);
+  font-size: clamp(32px, 3.5vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 60px;
+}
+
+/* ── FEATURES ── */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+
+.feat-card {
+  padding: 32px 28px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: background 150ms;
+}
+.feat-card:hover { background: var(--c1); }
+
+.feat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #4b6cf7, #00d4ff, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 250ms var(--ease);
+}
+.feat-card:hover::before { transform: scaleX(1); }
+
+.feat-n {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt3);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+
+.feat-icon {
+  width: 38px; height: 38px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+  transition: border-color 150ms;
+}
+.feat-card:hover .feat-icon { border-color: rgba(200,240,77,0.3); }
+
+.feat-icon svg {
+  width: 16px; height: 16px;
+  stroke: var(--txt2);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 150ms;
+}
+.feat-card:hover .feat-icon svg { stroke: var(--acc); }
+
+.feat-card h3 {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--txt);
+  margin-bottom: 8px;
+}
+
+.feat-card p {
+  font-size: 12.5px;
+  color: var(--txt2);
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* ── PREVIEW / LOADSTRING ── */
+.preview-section {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  min-height: 400px;
+}
+
+.prev-left {
+  padding: 72px 60px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.prev-left h2 {
+  font-family: var(--font-head);
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+
+.prev-left p {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--txt2);
+  line-height: 1.75;
+  max-width: 380px;
+  margin-bottom: 32px;
+}
+
+.prev-right {
+  background: var(--c1);
+  padding: 72px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.code-window {
+  background: var(--c0);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cw-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cw-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c4); }
+
+.cw-lbl {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--txt3);
+  letter-spacing: 0.06em;
+}
+
+.cw-code {
+  padding: 20px 18px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--txt2);
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step-item:last-child { border-bottom: none; }
+
+.step-n {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--acc);
+  width: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-txt {
+  font-size: 12px;
+  color: var(--txt2);
+  font-weight: 300;
+  line-height: 1.5;
+}
+.step-txt strong {
+  color: var(--txt);
+  font-weight: 500;
+}
+
+/* ── CTA ── */
+.cta-section {
+  padding: 120px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(0,212,255,0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.cta-section h2 {
+  font-family: var(--font-head);
+  font-size: clamp(40px, 5vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.cta-section p {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--txt2);
+  max-width: 380px;
+  margin: 0 auto 40px;
+  line-height: 1.75;
+  position: relative;
+}
+
+.cta-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  position: relative;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 20px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.foot-logo {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--txt3);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
+.foot-links {
+  display: flex;
+  gap: 24px;
+}
+.foot-links a {
+  font-size: 11px;
+  color: var(--txt3);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  transition: color 140ms;
+}
+.foot-links a:hover { color: var(--txt2); }
+
+.foot-copy {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--txt3);
+}
+
+/* ── REVEAL ANIM ── */
+.r {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
+}
+.r.in { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-left { padding: 80px 32px; }
+  .feat-grid { grid-template-columns: 1fr 1fr; }
+  .statsbar { grid-template-columns: repeat(2, 1fr); }
+  .preview-section { grid-template-columns: 1fr; }
+  .prev-left, .prev-right { padding: 48px 32px; }
+  .prev-left { border-right: none; border-bottom: 1px solid var(--border); }
+  .section { padding: 64px 32px; }
+  footer { padding: 18px 32px; flex-wrap: wrap; gap: 10px; }
+  nav { padding: 0 20px; }
+  .nav-center { display: none; }
+}
+
+@media (max-width: 600px) {
+  .feat-grid { grid-template-columns: 1fr; }
+  .statsbar { grid-template-columns: 1fr; }
+  .sb-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .cta-section { padding: 80px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-mark"></span>
+    TLMenu
+  </a>
+  <ul class="nav-center">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#loadstring">Loadstring</a></li>
+    <li><a href="https://telelumi.github.io/Nametags">Nametag Uploader</a></li>
+  </ul>
+  <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" class="nav-dl" target="_blank">↓ Script</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">v0.069 — Beta</div>
+    <h1>The<br><span class="h1-accent">TL</span><br>Menu</h1>
+    <p class="hero-desc">
+      Ein GUI-System für Roblox, das nicht aussieht wie jedes andere. Cleaner Aufbau, 40+ Komponenten, direkter Einstieg.
+    </p>
+    <div class="hero-actions">
+      <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" class="btn-main" target="_blank">DOWNLOAD FREE</a>
+      <a href="#loadstring" class="btn-ghost">Loadstring ↓</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="demo-wrap">
+      <div class="demo-icon-pill">
+        <div class="dip-icon">TL</div>
+        <span class="dip-label">TLMenu · aktiv</span>
+      </div>
+
+      <div class="demo-screen">
+        <div class="demo-titlebar">
+          <span class="dtb-dot"></span><span class="dtb-dot"></span><span class="dtb-dot"></span>
+          <span class="dtb-title">Roblox — GUI Demo</span>
+        </div>
+        <div class="demo-body">
+          <div id="tl-panel">
+            <div class="tlp-header" id="tlp-drag">
+              <span class="tlp-title">TLMenu</span>
+              <button class="tlp-close" id="tlp-close">✕</button>
+            </div>
+            <div class="tlp-tabs">
+              <button class="tlp-tab active" data-tab="home">HOME</button>
+              <button class="tlp-tab" data-tab="char">CHAR</button>
+              <button class="tlp-tab" data-tab="scripts">SCRIPTS</button>
+            </div>
+            <div class="tlp-content" id="tlp-body">
+              <div class="tlp-welcome">Willkommen — Demo aktiv.</div>
+              <button class="tlp-btn" id="tlp-action">RUN ACTION</button>
+              <div class="tlp-row">
+                <span class="tlp-lbl">FlyMode</span>
+                <div class="tlp-toggle" id="tlp-fly"><div class="tlp-thumb"></div></div>
+              </div>
+              <div class="tlp-row">
+                <span class="tlp-lbl">Aimbot</span>
+                <div class="tlp-toggle" id="tlp-aim"><div class="tlp-thumb"></div></div>
+              </div>
+              <div class="tlp-ok" id="tlp-ok">✓ Ausgeführt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-snip" style="position:relative;">
+        <span class="c-dim">-- inject:</span><br>
+        <span class="c-kw">loadstring</span>(<span class="c-str">game</span>:HttpGet(<span class="c-str">'https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua'</span>))()
+        <button class="copy-btn" id="copy-btn">COPY</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="statsbar">
+  <div class="sb-item r">
+    <div class="sb-num">12<span>k+</span></div>
+    <div class="sb-lbl">Downloads</div>
+  </div>
+  <div class="sb-item r">
+    <div class="sb-num">0<span>.3ms</span></div>
+    <div class="sb-lbl">Avg. Load Time</div>
+  </div>
+  <div class="sb-item r">
+    <div class="sb-num">40<span>+</span></div>
+    <div class="sb-lbl">Komponenten</div>
+  </div>
+  <div class="sb-item r">
+    <div class="sb-num">v<span>0.069</span></div>
+    <div class="sb-lbl">Aktuell</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="sec-tag">Features</div>
+  <div class="sec-title">Built different.</div>
+
+  <div class="feat-grid">
+    <div class="feat-card r">
+      <div class="feat-n">01</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <h3>QuickActions</h3>
+      <p>40+ Sozial-Animationen — Hug, Kiss, Slap — direkt per Klick auf jeden Spieler.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">02</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+      <h3>Emote System</h3>
+      <p>Dot-Taste öffnet das Emote-Wheel. Sofort erreichbar, mitten im Spiel.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">03</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+      <h3>Recolorable GUI</h3>
+      <p>Komplette Farbpalette anpassbar. Eigenes Design, eigener Stil.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">04</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div>
+      <h3>Smartbar Tabs</h3>
+      <p>Home · Character · Scripts · Actions · Playerlist · Settings — sauber oben.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">05</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>Game Scripts</h3>
+      <p>Eingebaute Hubs für MM2, Bladeball und 99 Nights. Direkt aus dem Scripts-Tab.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">06</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h3>DE &amp; FR Voice</h3>
+      <p>GUI-Sprache zwischen Deutsch und Französisch umschalten — einzigartiger Audio-Skin.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">07</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg></div>
+      <h3>Universal FE Aimbot</h3>
+      <p>Smooth, konfigurierbar — FOV und Sensitivity per Schieberegler einstellbar.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">08</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/></svg></div>
+      <h3>Troll Options</h3>
+      <p>Via QuickActions. Free-Admin-Sessions interessant halten.</p>
+    </div>
+    <div class="feat-card r">
+      <div class="feat-n">09</div>
+      <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+      <h3>40+ Animationen</h3>
+      <p>Dances, Reaktionen, Gesten — alles FE-ready und sofort einsatzbereit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LOADSTRING SECTION -->
+<div class="preview-section" id="loadstring">
+  <div class="prev-left r">
+    <div class="sec-tag" style="margin-bottom:14px;">Loadstring</div>
+    <h2>Copy.<br>Inject.<br>Done.</h2>
+    <p>Kein Setup, kein Konfigurationsaufwand. Einfach den Loadstring in deinen Executor kopieren und loslegen.</p>
+    <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" class="btn-main" target="_blank">DOWNLOAD v0.069</a>
+  </div>
+  <div class="prev-right r">
+    <div class="code-window">
+      <div class="cw-bar">
+        <span class="cw-dot"></span><span class="cw-dot"></span><span class="cw-dot"></span>
+        <span class="cw-lbl">executor.lua</span>
+      </div>
+      <div class="cw-code">
+        <span style="color:var(--txt3)">-- TLMenu Loadstring</span><br>
+        <span style="color:var(--acc)">loadstring</span>(<span style="color:#5bc4d8">game</span>:HttpGet(<br>
+        &nbsp;&nbsp;<span style="color:#5bc4d8">'https://raw.githubusercontent.com/<br>&nbsp;&nbsp;&nbsp;telelumi/TLMenu/refs/heads/<br>&nbsp;&nbsp;&nbsp;main/TLMenuBETA.lua'</span><br>
+        ))()
+      </div>
+    </div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <span class="step-n">01</span>
+        <span class="step-txt"><strong>Script öffnen</strong> — Executor starten</span>
+      </div>
+      <div class="step-item">
+        <span class="step-n">02</span>
+        <span class="step-txt"><strong>Loadstring einfügen</strong> — in das Skript-Feld</span>
+      </div>
+      <div class="step-item">
+        <span class="step-n">03</span>
+        <span class="step-txt"><strong>Execute</strong> — TLMenu startet automatisch</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready?<br><span style="color:var(--acc)">Get started.</span></h2>
+  <p>Download TLMenu und bau Roblox-Interfaces, die tatsächlich gut aussehen.</p>
+  <div class="cta-btns">
+    <a href="https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua" class="btn-main" target="_blank">DOWNLOAD FREE</a>
+    <a href="https://github.com/telelumi/TLMenu" class="btn-ghost" target="_blank">GitHub ↗</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="foot-logo">TLMenu © 2026</a>
+  <div class="foot-links">
+    <a href="#features">Features</a>
+    <a href="https://github.com/telelumi/TLMenu" target="_blank">GitHub</a>
+    <a href="https://telelumi.github.io/Nametags">Nametag Uploader</a>
+  </div>
+  <span class="foot-copy">v0.069</span>
+</footer>
+
+<script>
+/* ── Demo GUI logic ── */
+(function() {
+  const fly = document.getElementById('tlp-fly');
+  const aim = document.getElementById('tlp-aim');
+  const action = document.getElementById('tlp-action');
+  const ok = document.getElementById('tlp-ok');
+  const tabs = document.querySelectorAll('.tlp-tab');
+  let okTimer;
+
+  [fly, aim].forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+
+  action.addEventListener('click', () => {
+    ok.style.opacity = '1';
+    clearTimeout(okTimer);
+    okTimer = setTimeout(() => { ok.style.opacity = '0'; }, 1800);
+    action.style.transform = 'scale(0.95)';
+    setTimeout(() => { action.style.transform = ''; }, 120);
+  });
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+})();
+
+/* ── Copy button ── */
+document.getElementById('copy-btn').addEventListener('click', function() {
+  const code = "loadstring(game:HttpGet('https://raw.githubusercontent.com/telelumi/TLMenu/refs/heads/main/TLMenuBETA.lua'))()";
+  navigator.clipboard.writeText(code).catch(() => {});
+  this.textContent = '✓ OK';
+  setTimeout(() => { this.textContent = 'COPY'; }, 1600);
+});
+
+/* ── Scroll reveal ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      e.target.style.transitionDelay = (i * 0.05) + 's';
+      e.target.classList.add('in');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.r').forEach(el => obs.observe(el));
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
+});
+</script>
+</body>
+</html>
