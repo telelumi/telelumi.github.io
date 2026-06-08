@@ -13,3 +13,7 @@
 -- MODERATOREN
 ["100200300"] = { display = "TL Moderator", role = "Moderator" },
 ["400500600"] = { display = "TL Moderator", role = "Moderator" },
+
+-- Marketing
+["Mohamed2872725"] = { display = "TL Marketing", role = "Marketing" },
+["400500600"] = { display = "TL Moderator", role = "Moderator" },
