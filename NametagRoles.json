@@ -1,5 +1,5 @@
 -- OWNER
-["838302834"] = { display = "TL Owner | telelumi", role = "Imagine me in my prime" },
+["838302834"] = { display = "TL Owner | telelumi", role = "𝗜𝗺𝗮𝗴𝗶𝗻𝗲 𝗺𝗲 𝗶𝗻 𝗺𝘆 𝗽𝗿𝗶𝗺𝗲" },
 
 -- ADMINS
 ["NiTrOx_Jamie0"] = { display = "TL Admin | Sleepy", role = "Administrator" },
@@ -12,8 +12,10 @@
 
 -- MODERATOREN
 ["Irisoport"] = { display = "TL Moderator | Sec", role = "Moderator" },
-["400500600"] = { display = "TL Moderator", role = "Moderator" },
+["222222"] = { display = "TL Moderator | ", role = "Moderator" },
+["111111"] = { display = "TL Moderator | ", role = "Moderator" },
 
 -- Marketing
 ["Mohamed2872725"] = { display = "TL Marketing | Vito", role = "Marketing" },
-["400500600"] = { display = "TL Moderator", role = "Moderator" },
+["11111113"] = { display = "TL Marketing | ", role = "Marketing" },
+["11111112"] = { display = "TL Marketing | ", role = "Marketing" },
