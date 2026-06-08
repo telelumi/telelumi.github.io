@@ -12,7 +12,7 @@
 
 -- MODERATOREN
 ["Irisoport"] = { display = "TL Moderator | Sec", role = "Moderator" },
-["222222"] = { display = "TL Moderator | ", role = "Moderator" },
+["c3scx"] = { display = "TL Moderator | RootKit", role = "Moderator" },
 ["111111"] = { display = "TL Moderator | ", role = "Moderator" },
 
 -- Marketing
