@@ -1,19 +1,19 @@
 -- OWNER
-["83649284"] = { display = "TL Owner", role = "Administrator" },
+["83649284"] = { display = "TL Owner | telelumi", role = "Imagine me in my prime" },
 
 -- ADMINS
-["NiTrOx_Jamie0"] = { display = "TL Admin", role = "Administrator" },
+["NiTrOx_Jamie0"] = { display = "TL Admin | Sleepy", role = "Administrator" },
 ["Opacraker"] = { display = "TL Admin", role = "Administrator" },
-["usxirr"] = { display = "TL Admin", role = "Administrator" },
+["usxirr"] = { display = "TL Admin | Oso", role = "Administrator" },
 
 -- DEVELOPER
 ["444555666"] = { display = "TL Developer", role = "Developer" },
 ["777888999"] = { display = "TL Developer", role = "Developer" },
 
 -- MODERATOREN
-["100200300"] = { display = "TL Moderator", role = "Moderator" },
+["Irisoport"] = { display = "TL Moderator | Sec", role = "Moderator" },
 ["400500600"] = { display = "TL Moderator", role = "Moderator" },
 
 -- Marketing
-["Mohamed2872725"] = { display = "TL Marketing", role = "Marketing" },
+["Mohamed2872725"] = { display = "TL Marketing | Vito", role = "Marketing" },
 ["400500600"] = { display = "TL Moderator", role = "Moderator" },
