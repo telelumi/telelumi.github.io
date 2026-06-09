@@ -1,26 +1,26 @@
 -- TL OWNER
------------
+-- ▬▬▬▬▬▬▬▬
 ["gatewAyfury"] = { display = "TL Owner | telelumi", role = "Imagine me in my prime" },
 
 -- TL ADMINS
-------------
+-- ▬▬▬▬▬▬▬▬▬
 ["NiTrOx_Jamie0"] = { display = "TL Admin | Sleepy", role = "Administrator" },
 ["Opacraker"] = { display = "TL Admin", role = "Administrator" },
 ["7338262"] = { display = "TL Admin | Oso", role = "Administrator" },
 
 -- TL DEVELOPER
----------------
+-- ▬▬▬▬▬▬▬▬▬▬▬▬
 ["444555666"] = { display = "TL Developer", role = "Developer" },
 ["777888999"] = { display = "TL Developer", role = "Developer" },
 
 -- TL MODERATOR
----------------
+-- ▬▬▬▬▬▬▬▬▬▬▬▬
 ["Irisoport"] = { display = "TL Moderator | Sec", role = "Moderator" },
 ["c3scx"] = { display = "TL Moderator | RootKit", role = "Moderator" },
 ["arda_01xyz"] = { display = "TL Moderator | Arda ", role = "Moderator" },
 
 -- TL ADVERTISING
------------------
+-- ▬▬▬▬▬▬▬▬▬▬▬▬▬▬
 ["Mohamed2872725"] = { display = "TL Marketing | Vito", role = "Marketing" },
 ["11111113"] = { display = "TL Marketing | ", role = "Marketing" },
 ["11111112"] = { display = "TL Marketing | ", role = "Marketing" },
