@@ -199,9 +199,50 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 64px; di
   .preview-container { height: 50vh; }
   .preview-controls-bar { padding: 16px; }
 }
+
+/* ── PASSWORD GATE ── */
+.pw-overlay { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.5s ease, visibility 0.5s; }
+.pw-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.pw-box { width: 380px; max-width: 90vw; background: var(--bg1); border: 1px solid var(--line2); border-radius: 16px; padding: 40px 32px; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset; }
+.pw-logo { width: 56px; height: 56px; border-radius: 14px; overflow: hidden; margin: 0 auto 20px; border: 1px solid var(--line2); }
+.pw-logo img { width: 100%; height: 100%; object-fit: cover; }
+.pw-box h2 { font-family: var(--head); font-size: 20px; font-weight: 800; color: var(--t1); margin-bottom: 6px; letter-spacing: -0.02em; }
+.pw-box p { font-family: var(--mono); font-size: 11px; color: var(--t3); margin-bottom: 24px; }
+.pw-input-wrap { position: relative; margin-bottom: 16px; }
+.pw-input-wrap input { width: 100%; padding: 12px 16px; padding-right: 44px; background: var(--bg); border: 1px solid var(--line2); border-radius: 8px; font-family: var(--mono); font-size: 13px; color: var(--t1); outline: none; transition: border-color 200ms, box-shadow 200ms; letter-spacing: 0.04em; }
+.pw-input-wrap input:focus { border-color: rgba(14,165,233,0.5); box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+.pw-input-wrap input::placeholder { color: var(--t3); }
+.pw-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--t3); cursor: pointer; font-size: 16px; padding: 4px; transition: color 200ms; }
+.pw-eye:hover { color: var(--t2); }
+.pw-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, rgba(14,165,233,0.2), rgba(75,108,247,0.15)); border: 1px solid rgba(14,165,233,0.35); border-radius: 8px; font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--t1); cursor: pointer; transition: all 250ms; letter-spacing: 0.06em; text-transform: uppercase; }
+.pw-btn:hover { background: linear-gradient(135deg, rgba(14,165,233,0.3), rgba(75,108,247,0.25)); border-color: rgba(14,165,233,0.6); box-shadow: 0 4px 24px rgba(14,165,233,0.2); transform: translateY(-1px); }
+.pw-btn:active { transform: scale(0.98) translateY(0); }
+.pw-error { font-family: var(--mono); font-size: 11px; color: var(--red); margin-top: 12px; min-height: 16px; transition: opacity 200ms; opacity: 0; }
+.pw-error.show { opacity: 1; }
+.pw-shake { animation: pwShake 0.4s ease; }
+@keyframes pwShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+.main-content { display: none; }
+.main-content.unlocked { display: block; }
 </style>
 </head>
 <body>
+
+<!-- PASSWORD GATE -->
+<div class="pw-overlay" id="pwOverlay">
+  <div class="pw-box">
+    <div class="pw-logo"><img src="https://raw.githubusercontent.com/telelumi/TLASSETS/refs/heads/main/Icons/TL-Icon.png" alt="TL"></div>
+    <h2>Nametag Configurator</h2>
+    <p>Zugang nur für autorisierte Benutzer</p>
+    <div class="pw-input-wrap">
+      <input type="password" id="pwInput" placeholder="Passwort eingeben..." autocomplete="off">
+      <button class="pw-eye" id="pwEye" onclick="togglePwVis()" type="button">👁</button>
+    </div>
+    <button class="pw-btn" onclick="checkPassword()">Zugang</button>
+    <div class="pw-error" id="pwError"></div>
+  </div>
+</div>
+
+<div class="main-content" id="mainContent">
 
 <div class="bg-fx">
   <div class="bg-grid"></div>
@@ -725,6 +766,75 @@ document.querySelectorAll(".modal-overlay").forEach(el => { el.addEventListener(
 
 // START
 init();
+</script>
+
+</div><!-- /mainContent -->
+
+<script>
+// ── PASSWORD GATE ──
+const PW_HASH = "669cd5b82e2cb875f4505d9c2aa0a1672ce35bcc80a97817fcca9b23aff4a2bc";
+let pwAttempts = 0;
+
+async function hashPassword(pw) {
+  const enc = new TextEncoder().encode(pw);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+async function checkPassword() {
+  const input = document.getElementById("pwInput");
+  const err = document.getElementById("pwError");
+  const box = document.querySelector(".pw-box");
+  const pw = input.value;
+
+  if (!pw) {
+    err.textContent = "Bitte Passwort eingeben";
+    err.classList.add("show");
+    box.classList.add("pw-shake");
+    setTimeout(() => box.classList.remove("pw-shake"), 400);
+    return;
+  }
+
+  const hash = await hashPassword(pw);
+  if (hash === PW_HASH) {
+    document.getElementById("pwOverlay").classList.add("hidden");
+    document.getElementById("mainContent").classList.add("unlocked");
+    input.value = "";
+  } else {
+    pwAttempts++;
+    err.textContent = "Falsches Passwort";
+    err.classList.add("show");
+    box.classList.add("pw-shake");
+    input.value = "";
+    input.focus();
+    setTimeout(() => box.classList.remove("pw-shake"), 400);
+    if (pwAttempts >= 10) {
+      err.textContent = "Zu viele Versuche. Bitte Seite neu laden.";
+      document.querySelector(".pw-btn").disabled = true;
+    }
+  }
+}
+
+function togglePwVis() {
+  const input = document.getElementById("pwInput");
+  const eye = document.getElementById("pwEye");
+  if (input.type === "password") {
+    input.type = "text";
+    eye.textContent = "🔒";
+  } else {
+    input.type = "password";
+    eye.textContent = "👁";
+  }
+}
+
+document.getElementById("pwInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") checkPassword();
+});
+
+// Focus password input on load
+window.addEventListener("load", () => {
+  setTimeout(() => document.getElementById("pwInput").focus(), 100);
+});
 </script>
 </body>
 </html>
