@@ -1,1191 +1,292 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nametag Configurator — TLMenu</title>
-<meta name="description" content="Visual editor for the TLMenu Nametag system. Configure colors, layout, animations and more.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-/* ── RESET & BASE ── */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg:    #050508;
-  --bg1:   rgba(13, 16, 24, 0.65);
-  --bg2:   rgba(19, 23, 32, 0.8);
-  --bg3:   #1a1f2c;
-  --bg4:   #222838;
-  --line:  rgba(255, 255, 255, 0.08);
-  --line2: rgba(255, 255, 255, 0.15);
-  --t1: #f8fafc;
-  --t2: #94a3b8;
-  --t3: #475569;
-  --acc: #1ec8e0;
-  --acc-hover: #4fdcef;
-  --red: #ef4444;
-  --green: #10b981;
-  --tl-grad: linear-gradient(115deg, #2b6df0 0%, #17c4e8 26%, #2fe0c0 45%, #d8e84a 62%, #ffb648 80%, #ff5e9e 100%);
-  --tl-grad-soft: linear-gradient(115deg, rgba(43,109,240,0.16) 0%, rgba(23,196,232,0.16) 26%, rgba(47,224,192,0.16) 45%, rgba(216,232,74,0.16) 62%, rgba(255,182,72,0.16) 80%, rgba(255,94,158,0.16) 100%);
-  --tl-glow: rgba(47, 224, 192, 0.35);
-  --head: 'Geist', sans-serif;
-  --body: 'Geist', sans-serif;
-  --mono: 'Geist Mono', monospace;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-}
-
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-
-body {
-  background: var(--bg);
-  color: var(--t1);
-  font-family: var(--body);
-  font-size: 14px;
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-/* ── AMBIENT BG ── */
-.bg-fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.bg-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.6; will-change: transform; }
-.bg-orb.o1 { width: 600px; height: 600px; background: rgba(43, 109, 240, 0.14); top: -200px; left: -200px; animation: drift1 20s ease-in-out infinite alternate; }
-.bg-orb.o2 { width: 500px; height: 500px; background: rgba(255, 94, 158, 0.12); bottom: -100px; right: -100px; animation: drift2 25s ease-in-out infinite alternate; }
-.bg-orb.o3 { width: 460px; height: 460px; background: rgba(216, 232, 74, 0.08); top: 30%; right: 10%; animation: drift1 30s ease-in-out infinite alternate-reverse; }
-.bg-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, transparent 80%); }
-
-@keyframes drift1 { 0% { transform: translate(0,0); } 100% { transform: translate(100px, 100px); } }
-@keyframes drift2 { 0% { transform: translate(0,0); } 100% { transform: translate(-100px, -100px); } }
-
-/* ── LAYOUT ── */
-main, nav, section { position: relative; z-index: 1; }
-.app-wrapper { display: flex; justify-content: center; padding-top: 64px; min-height: 100vh; }
-.app { display: grid; grid-template-columns: minmax(0, 480px) minmax(0, 620px); width: 100%; max-width: 1160px; }
-
-/* ── NAV ── */
-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 32px; background: rgba(5, 5, 8, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-.nav-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1160px; }
-.logo { display: flex; align-items: center; gap: 12px; font-family: var(--head); font-size: 18px; font-weight: 700; color: var(--t1); letter-spacing: -0.02em; text-decoration: none; }
-.logo-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #0ea5e9, #38bdf8); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 800; font-size: 14px; color: #fff; }
-
-.nav-actions { display: flex; gap: 12px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius-sm); font-family: var(--mono); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.05em; border: none; outline: none; }
-.btn-primary { background: var(--tl-grad); background-size: 160% 160%; background-position: 0% 50%; color: #06070a; box-shadow: 0 4px 16px rgba(47, 224, 192, 0.25); transition: background-position 0.4s ease, transform 0.15s ease, box-shadow 0.2s ease, opacity 0.15s ease; }
-.btn-primary:hover { background-position: 100% 50%; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(47, 224, 192, 0.35); }
-.btn-primary:active { transform: scale(0.96) translateY(0px); box-shadow: 0 2px 8px rgba(47, 224, 192, 0.2); opacity: 0.9; }
-.btn-secondary { background: rgba(255,255,255,0.05); color: var(--t1); border: 1px solid var(--line2); transition: all 0.15s ease; }
-.btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--t2); transform: translateY(-1px); }
-.btn-secondary:active { transform: scale(0.96) translateY(0px); background: rgba(255,255,255,0.15); }
-
-/* ── EDITOR PANEL ── */
-.editor { background: var(--bg1); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-right: 1px solid var(--line); border-left: 1px solid var(--line); overflow-y: auto; height: calc(100vh - 64px); position: sticky; top: 64px; }
-.editor::-webkit-scrollbar { width: 4px; }
-.editor::-webkit-scrollbar-track { background: transparent; }
-.editor::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 4px; }
-
-.ed-section { border-bottom: 1px solid var(--line); }
-.ed-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; cursor: pointer; user-select: none; transition: background 0.2s; }
-.ed-head:hover { background: rgba(255,255,255,0.03); }
-.ed-head h3 { font-family: var(--head); font-size: 14px; font-weight: 600; color: var(--t1); letter-spacing: 0.02em; }
-.ed-head .arrow { font-size: 10px; color: var(--t3); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.ed-head.open .arrow { transform: rotate(180deg); }
-.ed-body { padding: 0 24px 24px; display: none; animation: slideDown 0.3s ease; }
-.ed-body.open { display: block; }
-
-@keyframes slideDown { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ── FORM CONTROLS ── */
-.field { margin-bottom: 16px; }
-.field-label { font-family: var(--mono); font-size: 11px; color: var(--t2); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: 500; }
-.field-row { display: flex; gap: 8px; align-items: center; }
-.input-text, select { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--line2); border-radius: var(--radius-sm); font-family: var(--body); font-size: 13px; color: var(--t1); outline: none; transition: all 0.15s ease; }
-.input-text:focus, select:focus { border-color: #2fe0c0; background: rgba(0,0,0,0.5); box-shadow: 0 0 0 3px rgba(47, 224, 192, 0.15); }
-.input-text:hover:not(:focus), select:hover:not(:focus) { border-color: rgba(255,255,255,0.25); background: rgba(0,0,0,0.4); }
-
-/* Enter / submit flash animation */
-@keyframes enterFlash { 0% { box-shadow: 0 0 0 3px rgba(47, 224, 192, 0.15); } 40% { box-shadow: 0 0 0 5px rgba(47, 224, 192, 0.55), 0 0 18px rgba(47, 224, 192, 0.35); border-color: #2fe0c0; } 100% { box-shadow: 0 0 0 3px rgba(47, 224, 192, 0.15); } }
-.input-enter-flash { animation: enterFlash 0.4s ease; }
-
-/* Success tag pop-in */
-@keyframes tagPopIn { 0% { opacity: 0; transform: scale(0.6); } 60% { transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
-.kw-tag-new { animation: tagPopIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards; }
-
-/* Color Picker */
-.color-pick { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: var(--radius-sm); border: 1px solid var(--line2); }
-.color-pick input[type="color"] { width: 28px; height: 28px; border: none; border-radius: 4px; cursor: pointer; background: transparent; padding: 0; }
-.color-pick input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-.color-pick input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; }
-.color-pick .hex { background: transparent; border: none; font-family: var(--mono); font-size: 12px; color: var(--t1); width: 100%; outline: none; padding: 0 8px; }
-
-/* Toggle */
-.toggle-wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--line); margin-bottom: 12px; }
-.toggle-label { font-size: 13px; color: var(--t1); font-weight: 500; }
-.toggle { position: relative; width: 40px; height: 22px; background: var(--bg4); border-radius: 11px; cursor: pointer; transition: background 0.3s, transform 0.1s; flex-shrink: 0; }
-.toggle:active { transform: scale(0.93); }
-.toggle.on { background: var(--tl-grad); background-size: 220% 220%; background-position: 20% 50%; }
-.toggle-knob { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-.toggle.on .toggle-knob { left: 21px; }
-
-/* Slider */
-.slider-wrap { display: flex; align-items: center; gap: 12px; }
-.slider-wrap input[type="range"] { flex: 1; -webkit-appearance: none; height: 6px; background: var(--bg4); border-radius: 3px; outline: none; }
-.slider-wrap input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--tl-grad); background-size: 250% 250%; background-position: 30% 50%; border-radius: 50%; cursor: pointer; border: 3px solid #fff; box-shadow: 0 0 10px var(--tl-glow); }
-.slider-val { font-family: var(--mono); font-size: 12px; color: var(--t2); min-width: 48px; text-align: right; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; }
-
-/* Theme Tabs */
-.theme-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-.theme-tab { padding: 8px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--head); font-size: 12px; font-weight: 500; color: var(--t2); cursor: pointer; transition: all 0.15s ease; text-transform: capitalize; }
-.theme-tab.active { background: var(--tl-grad-soft); border-color: transparent; background-clip: padding-box; position: relative; color: var(--t1); box-shadow: 0 0 0 1px rgba(47,224,192,0.4) inset, 0 0 15px rgba(47,224,192,0.12); }
-.theme-tab:hover:not(.active) { background: rgba(255,255,255,0.08); color: var(--t1); transform: translateY(-1px); }
-.theme-tab:active { transform: scale(0.95) translateY(0); }
-
-/* Color Grid */
-.color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.color-grid .full-width { grid-column: 1 / -1; }
-
-/* Avatar Table */
-.avatar-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: -8px; }
-.avatar-table th { font-family: var(--mono); font-size: 10px; color: var(--t3); text-transform: uppercase; text-align: left; padding: 0 8px; }
-.avatar-table td { padding: 0 4px; }
-.avatar-table .input-text { padding: 8px; font-size: 12px; }
-.btn-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s ease; }
-.btn-icon:hover { background: rgba(239, 68, 68, 0.2); transform: scale(1.08); }
-.btn-icon:active { transform: scale(0.92); }
-.btn-add { width: 100%; padding: 12px; background: transparent; border: 1px dashed var(--line2); border-radius: var(--radius-sm); font-family: var(--mono); font-size: 12px; color: var(--t2); cursor: pointer; transition: all 0.15s ease; margin-top: 8px; }
-.btn-add:hover { border-color: var(--acc); color: var(--acc); background: rgba(30, 200, 224, 0.05); transform: translateY(-1px); }
-.btn-add:active { transform: scale(0.98) translateY(0); }
-
-/* Keyword tags */
-.kw-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0; }
-.kw-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; background: rgba(255,255,255,0.06); border: 1px solid var(--line2); border-radius: 20px; font-family: var(--mono); font-size: 11px; color: var(--t1); transition: all 0.15s; }
-.kw-tag:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
-.kw-tag .rm { cursor: pointer; color: var(--t3); font-size: 13px; line-height: 1; transition: color 0.15s; }
-.kw-tag .rm:hover { color: var(--red); }
-
-/* Role Row Cards */
-.role-row { display: flex; align-items: stretch; gap: 0; background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 10px; transition: border-color 0.2s; }
-.role-row:hover { border-color: var(--line2); }
-.role-row-accent { width: 4px; flex-shrink: 0; }
-.role-row-body { flex: 1; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-.role-row-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.role-row-name { font-family: var(--head); font-size: 13px; font-weight: 700; text-transform: capitalize; color: var(--t1); display: flex; align-items: center; gap: 8px; }
-.role-row-name .role-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.role-row-count { font-family: var(--mono); font-size: 10px; color: var(--t3); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 10px; }
-.role-row-keywords { display: flex; flex-wrap: wrap; gap: 6px; }
-.role-row-input { display: flex; gap: 6px; margin-top: 2px; }
-.role-row-input .input-text { flex: 1; padding: 7px 10px; font-size: 11px; }
-.role-row-input .btn-icon { width: 30px; height: 30px; font-size: 16px; background: rgba(30, 200, 224, 0.08); color: var(--acc); border-color: rgba(30, 200, 224, 0.2); }
-.role-row-input .btn-icon:hover { background: rgba(30, 200, 224, 0.2); border-color: rgba(30, 200, 224, 0.5); transform: scale(1.1) rotate(90deg); }
-.role-row-input .btn-icon:active { transform: scale(0.9) rotate(90deg); }
-.role-row-divider { height: 1px; background: var(--line); margin: 2px 0; }
-.role-row-section-label { font-family: var(--mono); font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: 0.05em; }
-.kw-tag-user { background: rgba(30, 200, 224, 0.08); border-color: rgba(30, 200, 224, 0.25); color: var(--acc); }
-
-/* ── PREVIEW PANEL ── */
-.preview-container { display: flex; flex-direction: column; height: calc(100vh - 64px); position: sticky; top: 64px; border-right: 1px solid var(--line); }
-
-/* Dynamic Preview Controls */
-.preview-controls-bar { padding: 24px 40px 0; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; z-index: 2; position: relative; }
-.preview-controls-bar .field { margin-bottom: 0; min-width: 200px; }
-
-.preview { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; }
-.preview-theme-btns { display: flex; gap: 8px; margin-bottom: 40px; z-index: 2; background: rgba(0,0,0,0.4); padding: 8px; border-radius: var(--radius-lg); backdrop-filter: blur(8px); border: 1px solid var(--line); }
-.preview-theme-btn { padding: 8px 16px; border-radius: 8px; font-family: var(--head); font-size: 12px; font-weight: 600; color: var(--t2); cursor: pointer; transition: all 0.15s ease; text-transform: capitalize; }
-.preview-theme-btn.active { background: var(--tl-grad); background-size: 160% 160%; color: #06070a; box-shadow: 0 4px 12px rgba(47, 224, 192, 0.3); }
-.preview-theme-btn:hover:not(.active) { color: var(--t1); background: rgba(255,255,255,0.06); }
-.preview-theme-btn:active { transform: scale(0.93); }
-
-/* Nametag Preview Element */
-.nt-preview-wrap { position: relative; z-index: 2; margin-bottom: 40px; }
-.nt-preview { border-radius: 8px; overflow: hidden; display: flex; align-items: stretch; box-shadow: 0 12px 40px rgba(0,0,0,0.6); transition: all 0.3s ease; position: relative; }
-.nt-av { display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 8px 0 0 8px; overflow: hidden; position: relative; }
-.nt-av-inner { width: calc(100% - 6px); height: calc(100% - 6px); border-radius: 5px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: var(--head); font-weight: 700; }
-.nt-divider { width: 1px; align-self: stretch; margin: 20% 0; }
-.nt-content { padding: 4px 12px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-.nt-name { font-family: var(--head); font-weight: 700; white-space: nowrap; }
-.nt-role { font-family: var(--head); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; margin-top: 2px; }
-.nt-border { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
-
-/* Particles */
-.nt-particles { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
-.nt-particle { position: absolute; border-radius: 50%; opacity: 0.6; animation: particleFloat ease-in-out infinite alternate; }
-@keyframes particleFloat { 0% { transform: translate(0, 0) scale(0.8); } 100% { transform: translate(var(--dx), var(--dy)) scale(1.2); } }
-
-/* Status badge */
-.preview-status { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 2; display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 30px; font-family: var(--mono); font-size: 11px; color: var(--t2); }
-.preview-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-/* ── MODAL ── */
-.modal-overlay { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-.modal-overlay.open { display: flex; opacity: 1; }
-.modal { background: var(--bg3); border: 1px solid var(--line2); border-radius: var(--radius-lg); width: 90%; max-width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,0.02); }
-.modal-header h3 { font-family: var(--head); font-size: 18px; font-weight: 600; color: var(--t1); }
-.modal-close { background: transparent; border: none; color: var(--t3); font-size: 20px; cursor: pointer; transition: 0.2s; padding: 4px; }
-.modal-close:hover { color: var(--red); transform: scale(1.1); }
-.modal-body { padding: 24px; overflow-y: auto; flex: 1; }
-.modal-body textarea { width: 100%; height: 400px; background: rgba(0,0,0,0.3); border: 1px solid var(--line2); border-radius: var(--radius-sm); padding: 16px; font-family: var(--mono); font-size: 12px; color: var(--acc); resize: vertical; outline: none; }
-.modal-body textarea:focus { border-color: var(--acc); }
-.modal-footer { display: flex; gap: 12px; justify-content: flex-end; padding: 20px 24px; border-top: 1px solid var(--line); background: rgba(255,255,255,0.02); }
-
-/* Modal footer button press feedback */
-.modal-footer .btn:active { transform: scale(0.95); }
-.modal-close:active { transform: scale(0.9) !important; }
-
-/* Slider thumb active press */
-.slider-wrap input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.25); box-shadow: 0 0 16px var(--tl-glow), 0 0 6px rgba(255,255,255,0.3); }
-
-/* ed-head active */
-.ed-head:active { background: rgba(255,255,255,0.05); }
-
-/* kw-tag remove active */
-.kw-tag .rm:active { transform: scale(0.8); }
-
-/* ── TOAST ── */
-.toast { position: fixed; bottom: 32px; right: 32px; padding: 14px 24px; background: var(--bg3); border: 1px solid var(--acc); border-radius: var(--radius-sm); font-family: var(--mono); font-size: 13px; color: #fff; z-index: 2000; opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 8px 24px rgba(0,0,0,0.4); pointer-events: none; }
-.toast.show { opacity: 1; transform: translateY(0); }
-
-@media (max-width: 960px) {
-  .app { grid-template-columns: 1fr; }
-  .app-wrapper { padding-top: 64px; }
-  .editor { height: 60vh; border-right: 1px solid var(--line); border-left: 1px solid var(--line); position: static; }
-  .preview-container { height: auto; min-height: 50vh; border-right: 1px solid var(--line); position: static; }
-  .preview-controls-bar { padding: 16px; }
-}
-
-/* ── PASSWORD GATE ── */
-.pw-overlay { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.5s ease, visibility 0.5s; }
-.pw-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-.pw-box { width: 380px; max-width: 90vw; background: var(--bg1); border: 1px solid var(--line2); border-radius: 16px; padding: 40px 32px; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset; }
-.pw-logo { width: 56px; height: 56px; border-radius: 14px; overflow: hidden; margin: 0 auto 20px; border: 1px solid var(--line2); }
-.pw-logo img { width: 100%; height: 100%; object-fit: cover; }
-.pw-box h2 { font-family: var(--head); font-size: 20px; font-weight: 800; color: var(--t1); margin-bottom: 6px; letter-spacing: -0.02em; }
-.pw-box p { font-family: var(--mono); font-size: 11px; color: var(--t3); margin-bottom: 24px; }
-.pw-input-wrap { position: relative; margin-bottom: 16px; }
-.pw-input-wrap input { width: 100%; padding: 12px 16px; padding-right: 44px; background: var(--bg); border: 1px solid var(--line2); border-radius: 8px; font-family: var(--mono); font-size: 13px; color: var(--t1); outline: none; transition: border-color 200ms, box-shadow 200ms; letter-spacing: 0.04em; }
-.pw-input-wrap input:focus { border-color: rgba(30,200,224,0.5); box-shadow: 0 0 0 3px rgba(30,200,224,0.12); }
-.pw-input-wrap input::placeholder { color: var(--t3); }
-.pw-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--t3); cursor: pointer; font-size: 16px; padding: 4px; transition: color 200ms; }
-.pw-eye:hover { color: var(--t2); }
-.pw-btn { width: 100%; padding: 12px; background: var(--tl-grad); background-size: 160% 160%; background-position: 0% 50%; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; font-family: var(--mono); font-size: 12px; font-weight: 700; color: #06070a; cursor: pointer; transition: all 200ms ease; letter-spacing: 0.06em; text-transform: uppercase; }
-.pw-btn:hover { background-position: 100% 50%; border-color: rgba(255,255,255,0.3); box-shadow: 0 4px 24px var(--tl-glow); transform: translateY(-1px); }
-.pw-btn:active { transform: scale(0.97) translateY(0); box-shadow: 0 2px 10px var(--tl-glow); opacity: 0.9; }
-.pw-error { font-family: var(--mono); font-size: 11px; color: var(--red); margin-top: 12px; min-height: 16px; transition: opacity 200ms; opacity: 0; }
-.pw-error.show { opacity: 1; }
-.pw-shake { animation: pwShake 0.4s ease; }
-@keyframes pwShake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
-.main-content { display: none; }
-.main-content.unlocked { display: block; }
-</style>
-</head>
-<body>
-
-<!-- PASSWORD GATE -->
-<div class="pw-overlay" id="pwOverlay">
-  <div class="pw-box">
-    <div class="pw-logo"><img src="https://raw.githubusercontent.com/telelumi/TLASSETS/refs/heads/main/Icons/TL-Icon.png" alt="TL"></div>
-    <h2>Nametag Configurator</h2>
-    <p>Access for authorized users only</p>
-    <div class="pw-input-wrap">
-      <input type="password" id="pwInput" placeholder="Enter password..." autocomplete="off">
-      <button class="pw-eye" id="pwEye" onclick="togglePwVis()" type="button">👁</button>
-    </div>
-    <button class="pw-btn" onclick="checkPassword()">Access</button>
-    <div class="pw-error" id="pwError"></div>
-  </div>
-</div>
-
-<div class="main-content" id="mainContent">
-
-<div class="bg-fx">
-  <div class="bg-grid"></div>
-  <div class="bg-orb o1"></div>
-  <div class="bg-orb o2"></div>
-  <div class="bg-orb o3"></div>
-</div>
-
-<nav>
-  <div class="nav-inner">
-  <a href="#" class="logo">
-    <div class="logo-mark">TL</div>
-    Nametag Configurator
-  </a>
-  <div class="nav-actions">
-    <button class="btn btn-secondary" onclick="resetDefaults()">Reset</button>
-    <button class="btn btn-secondary" onclick="importJSON()">Import</button>
-    <button class="btn btn-primary" onclick="exportJSON()">Export JSON</button>
-  </div>
-  </div>
-</nav>
-
-<div class="app-wrapper">
-<div class="app">
-
-  <div class="editor" id="editor">
-
-    <div class="ed-section">
-      <div class="ed-head open" onclick="toggleSection(this)">
-        <h3>Global Settings</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body open">
-        <div class="toggle-wrap">
-          <span class="toggle-label">Nametag system enabled</span>
-          <div class="toggle on" id="togEnabled" onclick="toggleSwitch(this); config.enabled=!config.enabled; updatePreview()"><div class="toggle-knob"></div></div>
-        </div>
-        <div class="field">
-          <label class="field-label">Valid for target username (Optional)</label>
-          <input type="text" class="input-text" id="targetUserInp" placeholder="e.g. telelumi (Empty = Global for all)" onchange="config.targetUser=this.value" onkeydown="if(event.key==='Enter'){this.classList.add('input-enter-flash');setTimeout(()=>this.classList.remove('input-enter-flash'),400);config.targetUser=this.value;}">
-          <div style="font-size: 11px; color: var(--t3); margin-top: 6px;">If a name is entered here, the script will only apply this config to that player.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head open" onclick="toggleSection(this)">
-        <h3>Color Themes</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body open">
-        <div class="theme-tabs" id="themeTabs"></div>
-        <div class="color-grid" id="colorGrid"></div>
-      </div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Layout & Dimensions</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="layoutBody"></div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Animation</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="animBody"></div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Particle System</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="particleBody"></div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Gradients</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="gradientBody"></div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Role Keywords</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="keywordsBody"></div>
-      <div style="padding: 0 16px 14px; font-size: 11px; color: var(--t3); line-height: 1.5;">
-        Keywords are matched against a player's role description. If a player's role contains one of these keywords, the matching color scheme is applied. Directly assigned usernames take priority over keywords.
-      </div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Role Profile Pictures</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="profileBody"></div>
-    </div>
-
-    <div class="ed-section">
-      <div class="ed-head" onclick="toggleSection(this)">
-        <h3>Custom Player Avatars</h3><span class="arrow">▼</span>
-      </div>
-      <div class="ed-body" id="avatarBody"></div>
-    </div>
-
-  </div>
-
-  <div class="preview-container">
-    
-    <div class="preview-controls-bar">
-      <div class="field">
-        <label class="field-label">Preview Name</label>
-        <input type="text" class="input-text" id="prevName" value="PlayerName" oninput="updatePreview()">
-      </div>
-      <div class="field">
-        <label class="field-label">Preview Role</label>
-        <input type="text" class="input-text" id="prevRole" value="TL USER" oninput="updatePreview()">
-      </div>
-    </div>
-
-    <div class="preview">
-      <div class="preview-theme-btns" id="previewThemeBtns"></div>
-      <div class="nt-preview-wrap">
-        <div class="nt-preview" id="ntPreview">
-          <div class="nt-border" id="ntBorder"></div>
-          <div class="nt-av" id="ntAv">
-            <div class="nt-av-inner" id="ntAvInner"></div>
-          </div>
-          <div class="nt-divider" id="ntDivider"></div>
-          <div class="nt-content">
-            <div class="nt-name" id="ntNameDisplay">PlayerName</div>
-            <div class="nt-role" id="ntRoleDisplay">TL USER</div>
-          </div>
-          <div class="nt-particles" id="ntParticles"></div>
-        </div>
-      </div>
-      <div class="preview-status">
-        <div class="dot"></div>
-        <span>Live-Preview</span>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /app -->
-</div><!-- /app-wrapper -->
-
-<div class="modal-overlay" id="exportModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>NametagConfig.json</h3>
-      <button class="modal-close" onclick="closeModal('exportModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <textarea id="exportArea" readonly></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="downloadJSON()">Save as file</button>
-      <button class="btn btn-primary" onclick="copyExport()">Copy to clipboard</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="importModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Import Configuration</h3>
-      <button class="modal-close" onclick="closeModal('importModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <textarea id="importArea" placeholder="Paste your JSON code here..."></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('importModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="doImport()">Import</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ── DEFAULT CONFIG ──
-const DEFAULTS = {
-  version: 1,
-  enabled: true,
-  targetUser: "", // <-- New field for specific player assignment
-  themes: {
-    user:       { bg:"#1A1A22", avatarBg:"#1F1F2C", avatarText:"#A0A0C0", divider:"#A0A0C0", border:"#A0A0B4", nameText:"#E6E6F0", roleText:"#7878A0", bgGradient:false, bgGradientType:"linear", bgGradientColors:["#1A1A22","#0E0E18"], bgGradientAngle:0 },
-    admin:      { bg:"#220E0E", avatarBg:"#2A1212", avatarText:"#FF6464", divider:"#FF6464", border:"#DC5050", nameText:"#FF8C8C", roleText:"#C83C3C", bgGradient:false, bgGradientType:"linear", bgGradientColors:["#220E0E","#150808"], bgGradientAngle:0 },
-    owner:      { bg:"#160E1E", avatarBg:"#1B1226", avatarText:"#B87CFF", divider:"#B87CFF", border:"#AA64FF", nameText:"#DDB8FF", roleText:"#8850CC", bgGradient:false, bgGradientType:"linear", bgGradientColors:["#160E1E","#0D0814"], bgGradientAngle:0 },
-    developer:  { bg:"#0C1428", avatarBg:"#101A34", avatarText:"#64B4FF", divider:"#64B4FF", border:"#50A0F0", nameText:"#8CD2FF", roleText:"#3C82DC", bgGradient:false, bgGradientType:"linear", bgGradientColors:["#0C1428","#060A18"], bgGradientAngle:0 },
-    advertising:{ bg:"#1C0E24", avatarBg:"#24122E", avatarText:"#C878FF", divider:"#C878FF", border:"#B464F0", nameText:"#E6AAFF", roleText:"#A050D2", bgGradient:false, bgGradientType:"linear", bgGradientColors:["#1C0E24","#100818"], bgGradientAngle:0 },
-    moderator:  { bg:"#221C0A", avatarBg:"#2A220C", avatarText:"#FFC83C", divider:"#FFC83C", border:"#F0B428", nameText:"#FFDC64", roleText:"#DCA01E", bgGradient:false, bgGradientType:"linear", bgGradientColors:["#221C0A","#141006"], bgGradientAngle:0 }
+{
+  "version": 1,
+  "enabled": true,
+  "targetUser": "",
+  "themes": {
+    "user": {
+      "bg": "#1A1A22",
+      "avatarBg": "#1F1F2C",
+      "avatarText": "#A0A0C0",
+      "divider": "#A0A0C0",
+      "border": "#A0A0B4",
+      "nameText": "#E6E6F0",
+      "roleText": "#7878A0",
+      "bgGradient": false,
+      "bgGradientType": "linear",
+      "bgGradientColors": [
+        "#1A1A22",
+        "#0E0E18"
+      ],
+      "bgGradientAngle": 0
+    },
+    "admin": {
+      "bg": "#220E0E",
+      "avatarBg": "#2A1212",
+      "avatarText": "#FF6464",
+      "divider": "#FF6464",
+      "border": "#DC5050",
+      "nameText": "#FF8C8C",
+      "roleText": "#C83C3C",
+      "bgGradient": false,
+      "bgGradientType": "linear",
+      "bgGradientColors": [
+        "#220E0E",
+        "#150808"
+      ],
+      "bgGradientAngle": 0
+    },
+    "owner": {
+      "bg": "#ffffff",
+      "avatarBg": "#ffffff",
+      "avatarText": "#ffffff",
+      "divider": "#ffffff",
+      "border": "#ffffff",
+      "nameText": "#ffffff",
+      "roleText": "#ffffff",
+      "bgGradient": true,
+      "bgGradientType": "fluid",
+      "bgGradientColors": [
+        "#31dddb",
+        "#00c291",
+        "#ff00d0"
+      ],
+      "bgGradientAngle": 0
+    },
+    "developer": {
+      "bg": "#0C1428",
+      "avatarBg": "#101A34",
+      "avatarText": "#64B4FF",
+      "divider": "#64B4FF",
+      "border": "#50A0F0",
+      "nameText": "#8CD2FF",
+      "roleText": "#3C82DC",
+      "bgGradient": false,
+      "bgGradientType": "linear",
+      "bgGradientColors": [
+        "#0C1428",
+        "#060A18"
+      ],
+      "bgGradientAngle": 0
+    },
+    "advertising": {
+      "bg": "#1C0E24",
+      "avatarBg": "#24122E",
+      "avatarText": "#C878FF",
+      "divider": "#C878FF",
+      "border": "#B464F0",
+      "nameText": "#E6AAFF",
+      "roleText": "#A050D2",
+      "bgGradient": false,
+      "bgGradientType": "linear",
+      "bgGradientColors": [
+        "#1C0E24",
+        "#100818"
+      ],
+      "bgGradientAngle": 0
+    },
+    "moderator": {
+      "bg": "#3e3518",
+      "avatarBg": "#272316",
+      "avatarText": "#FFC83C",
+      "divider": "#FFC83C",
+      "border": "#F0B428",
+      "nameText": "#ffffff",
+      "roleText": "#ffffff",
+      "bgGradient": false,
+      "bgGradientType": "linear",
+      "bgGradientColors": [
+        "#d3ad3c",
+        "#000000"
+      ],
+      "bgGradientAngle": 0
+    }
   },
-  layout: { billboardWidth:240, billboardHeight:44, studsOffsetY:3.4, avatarWidth:44, cornerRadius:8, innerCornerRadius:5, borderThickness:1, dividerWidth:1, dividerHeightPct:0.6, dividerTransparency:0.75, nameTextSize:13, nameFont:"GothamBold", roleTextSize:9, roleFont:"GothamBold", initialsTextSize:11, avatarTextGap:10, textPaddingRight:4, nameLabelHeight:20, nameLabelY:4, roleLabelHeight:12, roleLabelY:26, roleTextTransform:"upper", avatarImagePadding:3, distanceScaleEnabled:true, distanceScaleNear:10, distanceScaleFar:60, distanceScaleMin:0.35 },
-  animations: { fadeInDuration:0.3, fadeInEasing:"Quad", cardTransparency:0.1, borderTransparency:0.7 },
-  particles: { enabled:true, count:4, minSize:2, maxSize:4, transparency:0.5, moveDurationMin:3.0, moveDurationMax:5.0, colors:["#B87CFF","#A064F0","#C896FF","#8C50DC","#DDB8FF"] },
-  roleKeywords: { owner:["owner","vip"], developer:["developer","entwickler"], moderator:["moderator","mod"], admin:["admin","administrator"], advertising:["advertising","werbung"] },
-  roleUsers: { owner:[], admin:[], developer:[], moderator:[], advertising:[], user:[] },
-  gradients: {
-    cardGradient:    { enabled:false, type:"Linear", colors:["#B87CFF","#1A1A22"], transparency:[0,0], rotation:90, offset:[0,0] },
-    avatarGradient:  { enabled:false, type:"Linear", colors:["#B87CFF","#160E1E"], transparency:[0,0], rotation:180, offset:[0,0] },
-    nameGradient:    { enabled:false, type:"Linear", colors:["#FFFFFF","#B87CFF"], transparency:[0,0], rotation:0, offset:[0,0] },
-    roleGradient:    { enabled:false, type:"Linear", colors:["#B87CFF","#8850CC"], transparency:[0,0], rotation:0, offset:[0,0] },
-    borderGradient:  { enabled:false, type:"Linear", colors:["#B87CFF","#AA64FF"], transparency:[0,0], rotation:0, offset:[0,0] }
+  "layout": {
+    "billboardWidth": 240,
+    "billboardHeight": 44,
+    "studsOffsetY": 3.4,
+    "avatarWidth": 44,
+    "cornerRadius": 8,
+    "innerCornerRadius": 5,
+    "borderThickness": 1,
+    "dividerWidth": 1,
+    "dividerHeightPct": 0.6,
+    "dividerTransparency": 0.75,
+    "nameTextSize": 13,
+    "nameFont": "GothamBold",
+    "roleTextSize": 9,
+    "roleFont": "GothamBold",
+    "initialsTextSize": 11,
+    "avatarTextGap": 10,
+    "textPaddingRight": 4,
+    "nameLabelHeight": 20,
+    "nameLabelY": 4,
+    "roleLabelHeight": 12,
+    "roleLabelY": 26,
+    "roleTextTransform": "upper",
+    "avatarImagePadding": 3,
+    "distanceScaleEnabled": true,
+    "distanceScaleNear": 10,
+    "distanceScaleFar": 60,
+    "distanceScaleMin": 0.35
   },
-  profilePictures: {
-    owner:{ url:"https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NAMETAG-PROFILEPICTURES/TL-telelumi.png", file:"assets/TL-telelumi.png" },
-    user:{ url:"https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NAMETAG-PROFILEPICTURES/TLUSER-ROLE.png", file:"assets/TLUSER-ROLE.png" }
+  "animations": {
+    "fadeInDuration": 0.3,
+    "fadeInEasing": "Quad",
+    "cardTransparency": 0.1,
+    "borderTransparency": 0.7
   },
-  customAvatars: {
-    usxirr:{ url:"https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NAMETAG-PROFILEPICTURES/TL-Oso.png", file:"assets/TL-Usxirr.png", strokeStart:"#9A7211", strokeEnd:"#000000" }
-  }
-};
-
-const THEME_COLORS = ["bg","avatarBg","avatarText","divider","border","nameText","roleText"];
-const THEME_LABELS = { bg:"Background", avatarBg:"Avatar BG", avatarText:"Avatar Text", divider:"Divider", border:"Border", nameText:"Name", roleText:"Role" };
-const THEME_NAMES = ["user","admin","owner","developer","advertising","moderator"];
-const EASING_OPTIONS = ["Quad","Linear","Sine","Expo","Back","Bounce","Elastic"];
-const FONT_OPTIONS = ["GothamBold","Gotham","GothamBlack","SourceSans","SourceSansBold","Highway","Ubuntu","UbuntuBold","Cartoon","Code","CartoonBold","ArialBold","Arial"];
-
-// ── GRADIENT TYPES ──
-// Each type defines: display name, how many colors are reasonable (always 2-3 selectable),
-// whether a rotation/angle slider is shown, and a CSS render function for the live preview.
-const GRADIENT_TYPES = {
-  linear:      { label:"Linear Gradient",      angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  radial:      { label:"Radial Gradient",      angle:false, render:(c)=>`radial-gradient(circle at center, ${c.join(", ")})` },
-  conic:       { label:"Conic Gradient",       angle:true,  render:(c,a)=>`conic-gradient(from ${a}deg at center, ${c.join(", ")}, ${c[0]})` },
-  angular:     { label:"Angular Gradient",     angle:true,  render:(c,a)=>`conic-gradient(from ${a}deg at center, ${c.join(", ")})` },
-  mesh:        { label:"Mesh Gradient",        angle:false, render:(c)=>`radial-gradient(at 20% 25%, ${c[0]} 0%, transparent 55%), radial-gradient(at 80% 20%, ${c[1]||c[0]} 0%, transparent 55%), radial-gradient(at 50% 85%, ${c[2]||c[0]} 0%, transparent 55%), linear-gradient(135deg, ${c.join(", ")})` },
-  color:       { label:"Color Gradient",       angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  blend:       { label:"Gradient Blend",       angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  colorblend:  { label:"Color Blend",          angle:false, render:(c)=>`radial-gradient(circle at 30% 30%, ${c.join(", ")})` },
-  duotone:     { label:"Duotone Gradient",     angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c[0]} 0%, ${c[c.length-1]} 100%)` },
-  multicolor:  { label:"Multicolor Gradient",  angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  smooth:      { label:"Smooth Gradient",      angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, smooth:true },
-  soft:        { label:"Soft Gradient",        angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, soft:true },
-  glass:       { label:"Glass Gradient",       angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, glass:true },
-  neon:        { label:"Neon Gradient",        angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, glow:true },
-  metallic:    { label:"Metallic Gradient",    angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, metallic:true },
-  iridescent:  { label:"Iridescent Gradient",  angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, shimmer:true },
-  holographic: { label:"Holographic Gradient", angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, shimmer:true, glow:true },
-  aurora:      { label:"Aurora Gradient",      angle:false, render:(c)=>`radial-gradient(ellipse at 30% 0%, ${c[0]} 0%, transparent 60%), radial-gradient(ellipse at 70% 100%, ${c[2]||c[1]||c[0]} 0%, transparent 60%), linear-gradient(180deg, ${c.join(", ")})` },
-  sunset:      { label:"Sunset Gradient",      angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  spectrum:    { label:"Spectrum Gradient",    angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  liquid:      { label:"Liquid Gradient",      angle:false, render:(c)=>`radial-gradient(at 25% 30%, ${c[0]} 0%, transparent 50%), radial-gradient(at 75% 70%, ${c[2]||c[1]||c[0]} 0%, transparent 50%), linear-gradient(160deg, ${c.join(", ")})` },
-  dynamic:     { label:"Dynamic Gradient",     angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, animated:true },
-  fluid:       { label:"Fluid Gradient",       angle:false, render:(c)=>`radial-gradient(at 30% 20%, ${c[0]} 0%, transparent 55%), radial-gradient(at 70% 80%, ${c[2]||c[1]||c[0]} 0%, transparent 55%), linear-gradient(145deg, ${c.join(", ")})`, animated:true },
-  chromatic:   { label:"Chromatic Gradient",   angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, shimmer:true },
-  ombre:       { label:"Ombre",                angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  fade:        { label:"Fade",                 angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c[0]}, transparent)` },
-  transition:  { label:"Color Transition",     angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})` },
-  overlay:     { label:"Gradient Overlay",     angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, soft:true },
-  gradmesh:    { label:"Gradient Mesh",        angle:false, render:(c)=>`radial-gradient(at 15% 20%, ${c[0]} 0%, transparent 50%), radial-gradient(at 85% 15%, ${c[1]||c[0]} 0%, transparent 50%), radial-gradient(at 50% 90%, ${c[2]||c[0]} 0%, transparent 50%)` },
-  flow:        { label:"Gradient Flow",        angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, animated:true },
-  wave:        { label:"Gradient Wave",        angle:true,  render:(c,a)=>`linear-gradient(${a}deg, ${c.join(", ")})`, animated:true, soft:true }
-};
-const GRADIENT_TYPE_KEYS = Object.keys(GRADIENT_TYPES);
-
-let config = JSON.parse(JSON.stringify(DEFAULTS));
-let activeTheme = "user";
-
-// ── INIT ──
-function init() {
-  // Migration: ensures every theme has the new gradient fields
-  // (important when importing older configs without bgGradientType/Colors)
-  THEME_NAMES.forEach(t => {
-    const th = config.themes[t];
-    if (!th) return;
-    if (!th.bgGradientType) th.bgGradientType = "linear";
-    if (!th.bgGradientColors || th.bgGradientColors.length < 2) th.bgGradientColors = [th.bg, th.bg];
-    if (th.bgGradientAngle === undefined) th.bgGradientAngle = 0;
-  });
-  document.getElementById("targetUserInp").value = config.targetUser || "";
-  buildThemeTabs(); buildColorGrid(); buildLayout(); buildAnimation();
-  buildParticles(); buildKeywords(); buildProfilePictures(); buildAvatars();
-  buildGradients(); buildPreviewThemeBtns(); updatePreview();
-}
-
-function toggleSection(el) { el.classList.toggle("open"); el.nextElementSibling.classList.toggle("open"); }
-function toggleSwitch(el) { el.classList.toggle("on"); }
-
-// ── THEME TABS ──
-function buildThemeTabs() {
-  const c = document.getElementById("themeTabs");
-  c.innerHTML = THEME_NAMES.map(t => `<div class="theme-tab ${t===activeTheme?'active':''}" onclick="switchTheme('${t}')">${t}</div>`).join("");
-}
-function switchTheme(t) { activeTheme = t; buildThemeTabs(); buildColorGrid(); buildPreviewThemeBtns(); updatePreview(); }
-
-// ── COLOR GRID ──
-function buildColorGrid() {
-  const c = document.getElementById("colorGrid");
-  const theme = config.themes[activeTheme];
-  const gradFields = THEME_COLORS.map(k => `
-    <div class="field">
-      <label class="field-label">${THEME_LABELS[k]}</label>
-      <div class="color-pick">
-        <input type="color" value="${theme[k]}" onchange="config.themes['${activeTheme}']['${k}']=this.value; this.nextElementSibling.value=this.value; updatePreview()">
-        <input type="text" class="hex" value="${theme[k]}" onchange="config.themes['${activeTheme}']['${k}']=this.value; this.previousElementSibling.value=this.value; updatePreview()">
-      </div>
-    </div>
-  `).join("");
-
-  if (!theme.bgGradientType) theme.bgGradientType = "linear";
-  if (!theme.bgGradientColors || theme.bgGradientColors.length < 2) theme.bgGradientColors = [theme.bg, theme.bg];
-  if (theme.bgGradientAngle === undefined) theme.bgGradientAngle = 0;
-
-  const typeDef = GRADIENT_TYPES[theme.bgGradientType] || GRADIENT_TYPES.linear;
-  const colors = theme.bgGradientColors;
-
-  const colorPickersHtml = colors.map((col, i) => `
-    <div class="field" style="margin-bottom:10px;">
-      <label class="field-label">Color ${i+1}${colors.length < 3 ? '' : ''}</label>
-      <div class="field-row">
-        <div class="color-pick" style="flex:1;">
-          <input type="color" value="${col}" onchange="config.themes['${activeTheme}'].bgGradientColors[${i}]=this.value; this.nextElementSibling.value=this.value; updatePreview()">
-          <input type="text" class="hex" value="${col}" onchange="config.themes['${activeTheme}'].bgGradientColors[${i}]=this.value; this.previousElementSibling.value=this.value; updatePreview()">
-        </div>
-        ${colors.length > 2 ? `<button class="btn-icon" onclick="removeGradColor('${activeTheme}',${i})">✕</button>` : ''}
-      </div>
-    </div>
-  `).join("");
-
-  const gradSection = `
-    <div class="full-width" style="border-top: 1px solid var(--line); padding-top: 16px; margin-top: 8px;">
-      <div class="toggle-wrap">
-        <span class="toggle-label">Background gradient enabled</span>
-        <div class="toggle ${theme.bgGradient?'on':''}" onclick="config.themes['${activeTheme}'].bgGradient=!config.themes['${activeTheme}'].bgGradient; toggleSwitch(this); buildColorGrid(); updatePreview()"><div class="toggle-knob"></div></div>
-      </div>
-      ${theme.bgGradient ? `
-        <div class="field">
-          <label class="field-label">Gradient Type</label>
-          <select onchange="config.themes['${activeTheme}'].bgGradientType=this.value; buildColorGrid(); updatePreview()">
-            ${GRADIENT_TYPE_KEYS.map(k => `<option value="${k}" ${theme.bgGradientType===k?'selected':''}>${GRADIENT_TYPES[k].label}</option>`).join("")}
-          </select>
-        </div>
-        ${colorPickersHtml}
-        ${colors.length < 3 ? `<button class="btn-add" onclick="addGradColor('${activeTheme}')">+ Add color</button>` : ''}
-        ${typeDef.angle ? `
-        <div class="field" style="margin-top:14px;">
-          <label class="field-label">Angle (degrees)</label>
-          <div class="slider-wrap">
-            <input type="range" min="0" max="360" step="1" value="${theme.bgGradientAngle}" oninput="config.themes['${activeTheme}'].bgGradientAngle=parseInt(this.value); this.nextElementSibling.textContent=this.value+'°'; updatePreview()">
-            <span class="slider-val">${theme.bgGradientAngle}°</span>
-          </div>
-        </div>
-        ` : ''}
-      ` : ''}
-    </div>
-  `;
-  c.innerHTML = gradFields + gradSection;
-}
-
-function addGradColor(theme) {
-  const t = config.themes[theme];
-  if (!t.bgGradientColors) t.bgGradientColors = [t.bg, t.bg];
-  if (t.bgGradientColors.length >= 3) return;
-  t.bgGradientColors.push(t.bgGradientColors[t.bgGradientColors.length-1]);
-  buildColorGrid(); updatePreview();
-}
-function removeGradColor(theme, idx) {
-  const t = config.themes[theme];
-  if (t.bgGradientColors.length <= 2) return;
-  t.bgGradientColors.splice(idx, 1);
-  buildColorGrid(); updatePreview();
-}
-
-// Renders the CSS gradient for the live preview incl. style additions (Glow, Shimmer, Metallic, etc.)
-function renderGradientCss(theme) {
-  const typeDef = GRADIENT_TYPES[theme.bgGradientType] || GRADIENT_TYPES.linear;
-  const colors = theme.bgGradientColors && theme.bgGradientColors.length >= 2 ? theme.bgGradientColors : [theme.bg, theme.bg];
-  return typeDef.render(colors, theme.bgGradientAngle || 0);
-}
-
-// ── LAYOUT ──
-function buildLayout() {
-  const l = config.layout;
-  const sliders = [
-    ["billboardWidth","Total width (px)",50,400,1], ["billboardHeight","Total height (px)",20,100,1],
-    ["studsOffsetY","Y-Offset (Studs)",0,10,0.1],
-    ["avatarWidth","Avatar width (px)",20,80,1], ["cornerRadius","Corner radius",0,20,1],
-    ["innerCornerRadius","Inner corner radius",0,20,1],
-    ["borderThickness","Border thickness",0,5,0.5], ["dividerWidth","Divider width",0,5,1],
-    ["dividerHeightPct","Divider height (%)",0,1,0.05], ["dividerTransparency","Divider transparency",0,1,0.05],
-    ["nameTextSize","Name font size",6,24,1],
-    ["roleTextSize","Role font size",6,18,1],
-    ["initialsTextSize","Initials font size",6,18,1],
-    ["avatarTextGap","Avatar-text gap (px)",0,30,1],
-    ["textPaddingRight","Text right padding (px)",0,20,1],
-    ["nameLabelHeight","Name height (px)",8,40,1],
-    ["nameLabelY","Name Y position (px)",0,20,1],
-    ["roleLabelHeight","Role height (px)",8,30,1],
-    ["roleLabelY","Role Y position (px)",0,40,1],
-    ["avatarImagePadding","Avatar image inset (px)",0,10,1]
-  ];
-  const c = document.getElementById("layoutBody");
-  c.innerHTML = sliders.map(([key,label,min,max,step]) => `
-    <div class="field">
-      <label class="field-label">${label}</label>
-      <div class="slider-wrap">
-        <input type="range" min="${min}" max="${max}" step="${step}" value="${l[key]}" oninput="config.layout['${key}']=parseFloat(this.value); this.nextElementSibling.textContent=this.value; updatePreview()">
-        <span class="slider-val">${l[key]}</span>
-      </div>
-    </div>
-  `).join("") + `
-    <div class="field">
-      <label class="field-label">Name font</label>
-      <select onchange="config.layout.nameFont=this.value; updatePreview()">
-        ${FONT_OPTIONS.map(f => `<option ${l.nameFont===f?'selected':''}>${f}</option>`).join("")}
-      </select>
-    </div>
-    <div class="field">
-      <label class="field-label">Role font</label>
-      <select onchange="config.layout.roleFont=this.value; updatePreview()">
-        ${FONT_OPTIONS.map(f => `<option ${l.roleFont===f?'selected':''}>${f}</option>`).join("")}
-      </select>
-    </div>
-    <div class="field">
-      <label class="field-label">Role text style</label>
-      <select onchange="config.layout.roleTextTransform=this.value; updatePreview()">
-        <option value="upper" ${l.roleTextTransform==='upper'?'selected':''}>Uppercase (UPPER)</option>
-        <option value="lower" ${l.roleTextTransform==='lower'?'selected':''}>Lowercase (lower)</option>
-        <option value="none" ${l.roleTextTransform==='none'?'selected':''}>Original (Name)</option>
-      </select>
-    </div>
-    <div style="border-top:1px solid var(--line); padding-top:16px; margin-top:8px;">
-      <div class="toggle-wrap">
-        <span class="toggle-label">Distance Scaling</span>
-        <div class="toggle ${l.distanceScaleEnabled?'on':''}" onclick="config.layout.distanceScaleEnabled=!config.layout.distanceScaleEnabled; toggleSwitch(this); updatePreview()"><div class="toggle-knob"></div></div>
-      </div>
-      ${l.distanceScaleEnabled ? `
-        <div class="field"><label class="field-label">Near (Studs)</label><div class="slider-wrap"><input type="range" min="1" max="50" step="1" value="${l.distanceScaleNear}" oninput="config.layout.distanceScaleNear=parseInt(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${l.distanceScaleNear}</span></div></div>
-        <div class="field"><label class="field-label">Far (Studs)</label><div class="slider-wrap"><input type="range" min="20" max="200" step="1" value="${l.distanceScaleFar}" oninput="config.layout.distanceScaleFar=parseInt(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${l.distanceScaleFar}</span></div></div>
-        <div class="field"><label class="field-label">Min Scale</label><div class="slider-wrap"><input type="range" min="0.1" max="1" step="0.05" value="${l.distanceScaleMin}" oninput="config.layout.distanceScaleMin=parseFloat(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${l.distanceScaleMin}</span></div></div>
-      ` : ''}
-    </div>
-  `;
-}
-
-// ── ANIMATION ──
-function buildAnimation() {
-  const a = config.animations;
-  document.getElementById("animBody").innerHTML = `
-    <div class="field">
-      <label class="field-label">Fade-In Duration (seconds)</label>
-      <div class="slider-wrap">
-        <input type="range" min="0" max="2" step="0.05" value="${a.fadeInDuration}" oninput="config.animations.fadeInDuration=parseFloat(this.value); this.nextElementSibling.textContent=this.value+'s'; updatePreview()">
-        <span class="slider-val">${a.fadeInDuration}s</span>
-      </div>
-    </div>
-    <div class="field">
-      <label class="field-label">Fade-In Easing</label>
-      <select onchange="config.animations.fadeInEasing=this.value; updatePreview()">
-        ${EASING_OPTIONS.map(e => `<option ${a.fadeInEasing===e?'selected':''}>${e}</option>`).join("")}
-      </select>
-    </div>
-    <div class="field">
-      <label class="field-label">Card transparency</label>
-      <div class="slider-wrap">
-        <input type="range" min="0" max="1" step="0.05" value="${a.cardTransparency}" oninput="config.animations.cardTransparency=parseFloat(this.value); this.nextElementSibling.textContent=this.value; updatePreview()">
-        <span class="slider-val">${a.cardTransparency}</span>
-      </div>
-    </div>
-    <div class="field">
-      <label class="field-label">Border transparency</label>
-      <div class="slider-wrap">
-        <input type="range" min="0" max="1" step="0.05" value="${a.borderTransparency}" oninput="config.animations.borderTransparency=parseFloat(this.value); this.nextElementSibling.textContent=this.value; updatePreview()">
-        <span class="slider-val">${a.borderTransparency}</span>
-      </div>
-    </div>
-  `;
-}
-
-// ── PARTICLES ──
-function buildParticles() {
-  const p = config.particles;
-  const c = document.getElementById("particleBody");
-  c.innerHTML = `
-    <div class="toggle-wrap">
-      <span class="toggle-label">Particles enabled</span>
-      <div class="toggle ${p.enabled?'on':''}" onclick="config.particles.enabled=!config.particles.enabled; toggleSwitch(this); updatePreview()"><div class="toggle-knob"></div></div>
-    </div>
-    <div class="field"><label class="field-label">Count</label><div class="slider-wrap"><input type="range" min="0" max="12" step="1" value="${p.count}" oninput="config.particles.count=parseInt(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${p.count}</span></div></div>
-    <div class="field"><label class="field-label">Min size (px)</label><div class="slider-wrap"><input type="range" min="1" max="10" step="1" value="${p.minSize}" oninput="config.particles.minSize=parseInt(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${p.minSize}</span></div></div>
-    <div class="field"><label class="field-label">Max size (px)</label><div class="slider-wrap"><input type="range" min="1" max="20" step="1" value="${p.maxSize}" oninput="config.particles.maxSize=parseInt(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${p.maxSize}</span></div></div>
-    <div class="field"><label class="field-label">Transparency</label><div class="slider-wrap"><input type="range" min="0" max="1" step="0.05" value="${p.transparency}" oninput="config.particles.transparency=parseFloat(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${p.transparency}</span></div></div>
-    <div class="field"><label class="field-label">Move duration min (sec)</label><div class="slider-wrap"><input type="range" min="0.5" max="10" step="0.5" value="${p.moveDurationMin}" oninput="config.particles.moveDurationMin=parseFloat(this.value); this.nextElementSibling.textContent=this.value+'s'; updatePreview()"><span class="slider-val">${p.moveDurationMin}s</span></div></div>
-    <div class="field"><label class="field-label">Move duration max (sec)</label><div class="slider-wrap"><input type="range" min="1" max="15" step="0.5" value="${p.moveDurationMax}" oninput="config.particles.moveDurationMax=parseFloat(this.value); this.nextElementSibling.textContent=this.value+'s'; updatePreview()"><span class="slider-val">${p.moveDurationMax}s</span></div></div>
-    <div class="field"><label class="field-label">Colors</label><div id="particleColors"></div></div>
-  `;
-  buildParticleColors();
-}
-
-function buildParticleColors() {
-  const c = document.getElementById("particleColors");
-  if(!c) return;
-  c.innerHTML = config.particles.colors.map((col, i) => `
-    <div class="color-pick" style="margin-bottom:8px">
-      <input type="color" value="${col}" onchange="config.particles.colors[${i}]=this.value; this.nextElementSibling.value=this.value; updatePreview()">
-      <input type="text" class="hex" value="${col}" onchange="config.particles.colors[${i}]=this.value; this.previousElementSibling.value=this.value; updatePreview()">
-      <button class="btn-icon" onclick="config.particles.colors.splice(${i},1); buildParticleColors(); updatePreview()">✕</button>
-    </div>
-  `).join("") + `<button class="btn-add" onclick="config.particles.colors.push('#FFFFFF'); buildParticleColors(); updatePreview()">+ Add color</button>`;
-}
-
-// ── KEYWORDS + ROLE USERS ──
-const ROLE_COLORS = { user:"#64B4FF", admin:"#FF6464", owner:"#B87CFF", developer:"#50A0F0", advertising:"#C878FF", moderator:"#FFC83C" };
-
-function buildKeywords() {
-  const c = document.getElementById("keywordsBody");
-  c.innerHTML = THEME_NAMES.map(t => {
-    const kws = config.roleKeywords[t] || [];
-    const users = config.roleUsers[t] || [];
-    const color = ROLE_COLORS[t] || "#888";
-    return `
-    <div class="role-row">
-      <div class="role-row-accent" style="background: ${color};"></div>
-      <div class="role-row-body">
-        <div class="role-row-header">
-          <div class="role-row-name">
-            <span class="role-dot" style="background: ${color};"></span>
-            ${t}
-          </div>
-          <span class="role-row-count">${kws.length} Keyword${kws.length !== 1 ? 's' : ''} · ${users.length} User</span>
-        </div>
-        <div class="role-row-keywords">
-          ${kws.map((kw,i) => `<span class="kw-tag">${kw} <span class="rm" onclick="removeKeyword('${t}',${i})">×</span></span>`).join("")}
-          ${kws.length === 0 ? '<span style="font-size:11px; color:var(--t3); font-style:italic;">No keywords</span>' : ''}
-        </div>
-        <div class="role-row-input">
-          <input type="text" class="input-text" id="kwInput_${t}" placeholder="Add keyword..." onkeydown="if(event.key==='Enter'){addKeyword('${t}')}">
-          <button class="btn-icon" onclick="addKeyword('${t}')">+</button>
-        </div>
-        <div class="role-row-divider"></div>
-        <div class="role-row-section-label">Directly assigned usernames</div>
-        <div class="role-row-keywords">
-          ${users.map((u,i) => `<span class="kw-tag kw-tag-user">${u} <span class="rm" onclick="removeUsername('${t}',${i})">×</span></span>`).join("")}
-          ${users.length === 0 ? '<span style="font-size:11px; color:var(--t3); font-style:italic;">No users assigned</span>' : ''}
-        </div>
-        <div class="role-row-input">
-          <input type="text" class="input-text" id="usrInput_${t}" placeholder="Add Roblox username..." onkeydown="if(event.key==='Enter'){addUsername('${t}')}">
-          <button class="btn-icon" onclick="addUsername('${t}')">+</button>
-        </div>
-      </div>
-    </div>`;
-  }).join("");
-}
-function addKeyword(theme) {
-  const inp = document.getElementById("kwInput_"+theme);
-  const val = inp.value.trim().toLowerCase();
-  if(!val) { inp.classList.add("input-enter-flash"); setTimeout(()=>inp.classList.remove("input-enter-flash"),400); return; }
-  if(!config.roleKeywords[theme]) config.roleKeywords[theme]=[];
-  if(!config.roleKeywords[theme].includes(val)) config.roleKeywords[theme].push(val);
-  inp.value="";
-  inp.classList.add("input-enter-flash");
-  setTimeout(()=>inp.classList.remove("input-enter-flash"),400);
-  buildKeywords();
-  // Mark newest tag
-  setTimeout(()=>{
-    const tags = document.querySelectorAll(`#keywordsBody .kw-tag:not(.kw-tag-user)`);
-    const last = tags[tags.length-1];
-    if(last && last.textContent.trim().startsWith(val)) last.classList.add("kw-tag-new");
-  }, 10);
-}
-function removeKeyword(theme, idx) { config.roleKeywords[theme].splice(idx, 1); buildKeywords(); }
-function addUsername(theme) {
-  const inp = document.getElementById("usrInput_"+theme);
-  const val = inp.value.trim();
-  if(!val) { inp.classList.add("input-enter-flash"); setTimeout(()=>inp.classList.remove("input-enter-flash"),400); return; }
-  if(!config.roleUsers[theme]) config.roleUsers[theme]=[];
-  if(!config.roleUsers[theme].includes(val)) config.roleUsers[theme].push(val);
-  inp.value="";
-  inp.classList.add("input-enter-flash");
-  setTimeout(()=>inp.classList.remove("input-enter-flash"),400);
-  buildKeywords();
-  setTimeout(()=>{
-    const tags = document.querySelectorAll(`#keywordsBody .kw-tag-user`);
-    const last = tags[tags.length-1];
-    if(last) last.classList.add("kw-tag-new");
-  }, 10);
-}
-function removeUsername(theme, idx) { config.roleUsers[theme].splice(idx, 1); buildKeywords(); }
-
-// ── PROFILE PICTURES (DYNAMIC FIX) ──
-function buildProfilePictures() {
-  // Now all themes are read, not just "owner" and "user"
-  const c = document.getElementById("profileBody");
-  const pp = config.profilePictures || {};
-  c.innerHTML = THEME_NAMES.map(role => `
-    <div class="field" style="margin-bottom:24px; padding-bottom: 16px; border-bottom: 1px solid var(--line);">
-      <label class="field-label" style="color: var(--acc); font-size: 13px; text-transform: capitalize;">${role} Profile Picture</label>
-      <div class="field">
-        <label class="field-label">Image URL</label>
-        <input type="text" class="input-text" placeholder="https://..." value="${pp[role]?.url||''}" onchange="config.profilePictures['${role}']=config.profilePictures['${role}']||{}; config.profilePictures['${role}'].url=this.value; updatePreview()">
-      </div>
-      <div class="field">
-        <label class="field-label">Local file (Roblox Asset)</label>
-        <input type="text" class="input-text" placeholder="rbxassetid://..." value="${pp[role]?.file||''}" onchange="config.profilePictures['${role}']=config.profilePictures['${role}']||{}; config.profilePictures['${role}'].file=this.value">
-      </div>
-    </div>
-  `).join("");
-}
-
-// ── CUSTOM AVATARS ──
-function buildAvatars() {
-  const c = document.getElementById("avatarBody");
-  const entries = Object.entries(config.customAvatars||{});
-  let html = `<table class="avatar-table">
-    <thead><tr><th>Player</th><th>URL</th><th></th></tr></thead><tbody>`;
-  entries.forEach(([name, av]) => {
-    html += `<tr>
-      <td><input type="text" class="input-text av-name" value="${name}"></td>
-      <td><input type="text" class="input-text av-url" value="${av.url}"></td>
-      <td style="display:none"><input type="text" class="av-file" value="${av.file}"></td>
-      <td><button class="btn-icon" onclick="delete config.customAvatars['${name}']; buildAvatars()">✕</button></td>
-    </tr>`;
-  });
-  html += `</tbody></table><button class="btn-add" onclick="addAvatar()">+ Add custom avatar</button>`;
-  c.innerHTML = html;
-}
-function addAvatar() { config.customAvatars["NewUser_"+Math.floor(Math.random()*1000)] = { url:"", file:"", strokeStart:"#FFFFFF", strokeEnd:"#000000" }; buildAvatars(); }
-
-function syncAvatarsFromDOM() {
-  const rows = document.querySelectorAll("#avatarBody .avatar-table tbody tr");
-  const newAvatars = {};
-  rows.forEach(row => {
-    const name = row.querySelector(".av-name")?.value;
-    if (!name) return;
-    newAvatars[name] = { url: row.querySelector(".av-url")?.value||"", file: row.querySelector(".av-file")?.value||"", strokeStart:"#FFFFFF", strokeEnd:"#000000" };
-  });
-  config.customAvatars = newAvatars;
-}
-
-// ── GRADIENTS ──
-const GRAD_TARGETS = [
-  { key:"cardGradient",   label:"Card Gradient" },
-  { key:"avatarGradient", label:"Avatar Gradient" },
-  { key:"nameGradient",   label:"Name Gradient" },
-  { key:"roleGradient",   label:"Role Gradient" },
-  { key:"borderGradient", label:"Border Gradient" }
-];
-let activeGradTarget = "cardGradient";
-
-function buildGradients() {
-  if (!config.gradients) {
-    config.gradients = {};
-    GRAD_TARGETS.forEach(t => { config.gradients[t.key] = JSON.parse(JSON.stringify(DEFAULTS.gradients[t.key] || {enabled:false,type:"Linear",colors:["#B87CFF","#1A1A22"],transparency:[0,0],rotation:90,offset:[0,0]})); });
-  }
-  GRAD_TARGETS.forEach(t => { if (!config.gradients[t.key]) config.gradients[t.key] = JSON.parse(JSON.stringify(DEFAULTS.gradients[t.key] || {enabled:false,type:"Linear",colors:["#B87CFF","#1A1A22"],transparency:[0,0],rotation:90,offset:[0,0]})); });
-
-  const c = document.getElementById("gradientBody");
-  const tabs = GRAD_TARGETS.map(t => `<div class="theme-tab ${t.key===activeGradTarget?'active':''}" onclick="activeGradTarget='${t.key}'; buildGradients()">${t.label}</div>`).join("");
-  const g = config.gradients[activeGradTarget];
-
-  let html = `<div class="theme-tabs">${tabs}</div>`;
-  html += `<div class="toggle-wrap"><span class="toggle-label">Enabled</span><div class="toggle ${g.enabled?'on':''}" onclick="config.gradients['${activeGradTarget}'].enabled=!config.gradients['${activeGradTarget}'].enabled; toggleSwitch(this); buildGradients(); updatePreview()"><div class="toggle-knob"></div></div></div>`;
-  html += `<div class="field"><label class="field-label">Type</label><select onchange="config.gradients['${activeGradTarget}'].type=this.value; updatePreview()">`;
-  GRADIENT_TYPE_KEYS.forEach(k => { html += `<option value="${k}" ${g.type===k||g.type===k.charAt(0).toUpperCase()+k.slice(1)?'selected':''}>${GRADIENT_TYPES[k].label}</option>`; });
-  html += `</select></div>`;
-
-  html += `<div class="field"><label class="field-label">Rotation (deg)</label><div class="slider-wrap"><input type="range" min="0" max="360" step="1" value="${g.rotation||0}" oninput="config.gradients['${activeGradTarget}'].rotation=parseInt(this.value); this.nextElementSibling.textContent=this.value+'°'; updatePreview()"><span class="slider-val">${g.rotation||0}°</span></div></div>`;
-
-  (g.colors||[]).forEach((col, i) => {
-    html += `<div class="field"><label class="field-label">Color ${i+1}</label><div class="color-pick"><input type="color" value="${col}" onchange="config.gradients['${activeGradTarget}'].colors[${i}]=this.value; this.nextElementSibling.value=this.value; updatePreview()"><input type="text" class="hex" value="${col}" onchange="config.gradients['${activeGradTarget}'].colors[${i}]=this.value; this.previousElementSibling.value=this.value; updatePreview()"></div></div>`;
-  });
-  if ((g.colors||[]).length < 4) html += `<button class="btn-add" onclick="config.gradients['${activeGradTarget}'].colors.push(config.gradients['${activeGradTarget}'].colors[config.gradients['${activeGradTarget}'].colors.length-1]||'#FFFFFF'); buildGradients()">+ Color</button>`;
-
-  (g.transparency||[]).forEach((tr, i) => {
-    html += `<div class="field"><label class="field-label">Transparency ${i+1}</label><div class="slider-wrap"><input type="range" min="0" max="1" step="0.05" value="${tr}" oninput="config.gradients['${activeGradTarget}'].transparency[${i}]=parseFloat(this.value); this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${tr}</span></div></div>`;
-  });
-
-  html += `<div class="field"><label class="field-label">Offset X</label><div class="slider-wrap"><input type="range" min="-1" max="1" step="0.05" value="${(g.offset||[0,0])[0]}" oninput="config.gradients['${activeGradTarget}'].offset=[parseFloat(this.value),(config.gradients['${activeGradTarget}'].offset||[0,0])[1]]; this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${(g.offset||[0,0])[0]}</span></div></div>`;
-  html += `<div class="field"><label class="field-label">Offset Y</label><div class="slider-wrap"><input type="range" min="-1" max="1" step="0.05" value="${(g.offset||[0,0])[1]}" oninput="config.gradients['${activeGradTarget}'].offset=[(config.gradients['${activeGradTarget}'].offset||[0,0])[0],parseFloat(this.value)]; this.nextElementSibling.textContent=this.value; updatePreview()"><span class="slider-val">${(g.offset||[0,0])[1]}</span></div></div>`;
-
-  c.innerHTML = html;
-}
-
-// ── PREVIEW THEME BTNS ──
-function buildPreviewThemeBtns() {
-  document.getElementById("previewThemeBtns").innerHTML = THEME_NAMES.map(t => `<div class="preview-theme-btn ${t===activeTheme?'active':''}" onclick="switchTheme('${t}')">${t}</div>`).join("");
-}
-
-// ── UPDATE PREVIEW ──
-function updatePreview() {
-  const t = config.themes[activeTheme];
-  const l = config.layout;
-  const a = config.animations;
-  const p = config.particles;
-
-  // Dynamic name & role from input fields!
-  const dynName = document.getElementById("prevName").value || "PlayerName";
-  const dynRole = document.getElementById("prevRole").value || "ROLE";
-
-  const preview = document.getElementById("ntPreview");
-  preview.style.width = l.billboardWidth + "px";
-  preview.style.height = l.billboardHeight + "px";
-  preview.style.filter = "";
-  preview.style.backgroundBlendMode = "";
-  if (t.bgGradient) {
-    preview.style.background = renderGradientCss(t);
-  } else {
-    preview.style.background = t.bg;
-  }
-  preview.style.opacity = 1 - a.cardTransparency;
-
-  const border = document.getElementById("ntBorder");
-  border.style.border = l.borderThickness + "px solid " + t.border;
-  border.style.borderRadius = l.cornerRadius + "px";
-  border.style.opacity = 1 - a.borderTransparency;
-
-  const av = document.getElementById("ntAv");
-  av.style.width = l.avatarWidth + "px";
-  av.style.background = t.avatarBg;
-  av.style.borderRadius = l.cornerRadius + "px 0 0 " + l.cornerRadius + "px";
-
-  const avInner = document.getElementById("ntAvInner");
-  avInner.style.fontSize = l.initialsTextSize + "px";
-  avInner.style.color = t.avatarText;
-  avInner.textContent = dynName.substring(0, 2).toUpperCase(); // Dynamic initials
-
-  const divider = document.getElementById("ntDivider");
-  divider.style.width = l.dividerWidth + "px";
-  divider.style.background = t.divider;
-  divider.style.opacity = 1 - l.dividerTransparency;
-  divider.style.margin = (l.billboardHeight * (1 - l.dividerHeightPct) / 2) + "px 0";
-
-  const nameEl = document.getElementById("ntNameDisplay");
-  nameEl.style.fontSize = l.nameTextSize + "px";
-  nameEl.style.color = t.nameText;
-  nameEl.style.height = (l.nameLabelHeight || 20) + "px";
-  nameEl.style.lineHeight = (l.nameLabelHeight || 20) + "px";
-  nameEl.style.paddingTop = (l.nameLabelY || 4) + "px";
-  nameEl.style.paddingLeft = ((l.avatarWidth || 44) + (l.avatarTextGap || 10)) + "px";
-  nameEl.style.paddingRight = (l.textPaddingRight || 4) + "px";
-  nameEl.textContent = dynName;
-
-  const roleEl = document.getElementById("ntRoleDisplay");
-  roleEl.style.fontSize = l.roleTextSize + "px";
-  roleEl.style.color = t.roleText;
-  roleEl.style.height = (l.roleLabelHeight || 12) + "px";
-  roleEl.style.lineHeight = (l.roleLabelHeight || 12) + "px";
-  roleEl.style.paddingTop = ((l.roleLabelY || 26) - (l.nameLabelY || 4) - (l.nameLabelHeight || 20)) + "px";
-  roleEl.style.paddingLeft = ((l.avatarWidth || 44) + (l.avatarTextGap || 10)) + "px";
-  roleEl.style.paddingRight = (l.textPaddingRight || 4) + "px";
-  const roleTextTransform = l.roleTextTransform || "upper";
-  if (roleTextTransform === "upper") roleEl.textContent = dynRole.toUpperCase();
-  else if (roleTextTransform === "lower") roleEl.textContent = dynRole.toLowerCase();
-  else roleEl.textContent = dynRole;
-  roleEl.style.textTransform = roleTextTransform === "none" ? "none" : roleTextTransform === "lower" ? "lowercase" : "uppercase";
-
-  // Dynamische Partikel (Fix: gilt jetzt für das aktuelle Theme, nicht nur "owner")
-  const pCont = document.getElementById("ntParticles");
-  pCont.innerHTML = "";
-  if (p.enabled && p.colors && p.colors.length > 0) {
-    for (let i = 0; i < Math.min(p.count, 15); i++) {
-      const dot = document.createElement("div");
-      dot.className = "nt-particle";
-      const sz = p.minSize + Math.random() * (p.maxSize - p.minSize);
-      dot.style.width = sz + "px"; dot.style.height = sz + "px";
-      dot.style.background = p.colors[i % p.colors.length];
-      dot.style.opacity = 1 - p.transparency;
-      dot.style.left = (10 + Math.random() * 80) + "%";
-      dot.style.top = (10 + Math.random() * 80) + "%";
-      dot.style.setProperty("--dx", (Math.random()*40-20)+"px");
-      dot.style.setProperty("--dy", (Math.random()*40-20)+"px");
-      dot.style.animationDuration = (p.moveDurationMin + Math.random()*(p.moveDurationMax-p.moveDurationMin)) + "s";
-      pCont.appendChild(dot);
+  "particles": {
+    "enabled": true,
+    "count": 4,
+    "minSize": 2,
+    "maxSize": 4,
+    "transparency": 0.5,
+    "moveDurationMin": 3,
+    "moveDurationMax": 5,
+    "colors": [
+      "#ffe252",
+      "#ffdd00",
+      "#ffd500",
+      "#fae500",
+      "#856f00"
+    ]
+  },
+  "roleKeywords": {
+    "owner": [
+      "owner",
+      "vip"
+    ],
+    "developer": [
+      "developer",
+      "entwickler"
+    ],
+    "moderator": [
+      "moderator",
+      "mod"
+    ],
+    "admin": [
+      "admin",
+      "administrator"
+    ],
+    "advertising": [
+      "advertising",
+      "werbung"
+    ]
+  },
+  "roleUsers": {
+    "owner": [
+      "sscoutfinn"
+    ],
+    "admin": [],
+    "developer": [],
+    "moderator": [],
+    "advertising": [],
+    "user": []
+  },
+  "gradients": {
+    "cardGradient": {
+      "enabled": false,
+      "type": "Linear",
+      "colors": [
+        "#B87CFF",
+        "#1A1A22"
+      ],
+      "transparency": [
+        0,
+        0
+      ],
+      "rotation": 90,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "avatarGradient": {
+      "enabled": false,
+      "type": "Linear",
+      "colors": [
+        "#B87CFF",
+        "#160E1E"
+      ],
+      "transparency": [
+        0,
+        0
+      ],
+      "rotation": 180,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "nameGradient": {
+      "enabled": false,
+      "type": "Linear",
+      "colors": [
+        "#FFFFFF",
+        "#B87CFF"
+      ],
+      "transparency": [
+        0,
+        0
+      ],
+      "rotation": 0,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "roleGradient": {
+      "enabled": false,
+      "type": "Linear",
+      "colors": [
+        "#B87CFF",
+        "#8850CC"
+      ],
+      "transparency": [
+        0,
+        0
+      ],
+      "rotation": 0,
+      "offset": [
+        0,
+        0
+      ]
+    },
+    "borderGradient": {
+      "enabled": false,
+      "type": "Linear",
+      "colors": [
+        "#B87CFF",
+        "#AA64FF"
+      ],
+      "transparency": [
+        0,
+        0
+      ],
+      "rotation": 0,
+      "offset": [
+        0,
+        0
+      ]
+    }
+  },
+  "profilePictures": {
+    "owner": {
+      "url": "https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NAMETAG-PROFILEPICTURES/TL-telelumi.png",
+      "file": "assets/TL-telelumi.png"
+    },
+    "user": {
+      "url": "https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NAMETAG-PROFILEPICTURES/TLUSER-ROLE.png",
+      "file": "assets/TLUSER-ROLE.png"
+    }
+  },
+  "customAvatars": {
+    "usxirr": {
+      "url": "https://raw.githubusercontent.com/telelumi/telelumi.github.io/refs/heads/main/NAMETAG-PROFILEPICTURES/TL-Oso.png",
+      "file": "assets/TL-Usxirr.png",
+      "strokeStart": "#FFFFFF",
+      "strokeEnd": "#000000"
     }
   }
 }
-
-// ── EXPORT / IMPORT ──
-function exportJSON() {
-  syncAvatarsFromDOM();
-  // Apply target user to config
-  config.targetUser = document.getElementById("targetUserInp").value.trim();
-  document.getElementById("exportArea").value = JSON.stringify(config, null, 2);
-  document.getElementById("exportModal").classList.add("open");
-}
-function copyExport() { navigator.clipboard.writeText(document.getElementById("exportArea").value).catch(()=>{}); toast("JSON copied to clipboard!"); closeModal("exportModal"); }
-function downloadJSON() {
-  const blob = new Blob([JSON.stringify(config, null, 2)], {type:"application/json"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-  a.download = config.targetUser ? `NametagConfig_${config.targetUser}.json` : "NametagConfig_Global.json";
-  a.click(); toast("File downloaded!");
-}
-function importJSON() { document.getElementById("importArea").value = ""; document.getElementById("importModal").classList.add("open"); }
-function doImport() {
-  try {
-    const data = JSON.parse(document.getElementById("importArea").value);
-    if(!data.version) throw new Error("Invalid format (No version)");
-    config = data; init(); closeModal("importModal"); toast("Erfolgreich importiert!");
-  } catch(e) { toast("Error: " + e.message); }
-}
-function resetDefaults() {
-  if(!confirm("Do you really want to reset all settings?")) return;
-  config = JSON.parse(JSON.stringify(DEFAULTS)); init(); toast("Reset to defaults!");
-}
-
-function closeModal(id) { document.getElementById(id).classList.remove("open"); }
-function toast(msg) {
-  const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 3000);
-}
-
-document.querySelectorAll(".modal-overlay").forEach(el => { el.addEventListener("click", e => { if (e.target === el) el.classList.remove("open"); }); });
-
-// START
-init();
-</script>
-
-</div><!-- /mainContent -->
-
-<script>
-// ── PASSWORD GATE ──
-const PW_HASH = "669cd5b82e2cb875f4505d9c2aa0a1672ce35bcc80a97817fcca9b23aff4a2bc";
-let pwAttempts = 0;
-
-async function hashPassword(pw) {
-  const enc = new TextEncoder().encode(pw);
-  const buf = await crypto.subtle.digest("SHA-256", enc);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
-}
-
-async function checkPassword() {
-  const input = document.getElementById("pwInput");
-  const err = document.getElementById("pwError");
-  const box = document.querySelector(".pw-box");
-  const pw = input.value;
-
-  if (!pw) {
-    err.textContent = "Please enter a password";
-    err.classList.add("show");
-    box.classList.add("pw-shake");
-    setTimeout(() => box.classList.remove("pw-shake"), 400);
-    return;
-  }
-
-  const hash = await hashPassword(pw);
-  if (hash === PW_HASH) {
-    document.getElementById("pwOverlay").classList.add("hidden");
-    document.getElementById("mainContent").classList.add("unlocked");
-    input.value = "";
-  } else {
-    pwAttempts++;
-    err.textContent = "Wrong password";
-    err.classList.add("show");
-    box.classList.add("pw-shake");
-    input.value = "";
-    input.focus();
-    setTimeout(() => box.classList.remove("pw-shake"), 400);
-    if (pwAttempts >= 10) {
-      err.textContent = "Too many attempts. Please reload the page.";
-      document.querySelector(".pw-btn").disabled = true;
-    }
-  }
-}
-
-function togglePwVis() {
-  const input = document.getElementById("pwInput");
-  const eye = document.getElementById("pwEye");
-  if (input.type === "password") {
-    input.type = "text";
-    eye.textContent = "🔒";
-  } else {
-    input.type = "password";
-    eye.textContent = "👁";
-  }
-}
-
-document.getElementById("pwInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    const btn = document.querySelector(".pw-btn");
-    btn.classList.add("pw-btn-press");
-    btn.style.transform = "scale(0.97) translateY(0)";
-    btn.style.opacity = "0.9";
-    setTimeout(() => { btn.style.transform = ""; btn.style.opacity = ""; }, 180);
-    checkPassword();
-  }
-});
-
-// Focus password input on load
-window.addEventListener("load", () => {
-  setTimeout(() => document.getElementById("pwInput").focus(), 100);
-});
-</script>
-</body>
-</html>
